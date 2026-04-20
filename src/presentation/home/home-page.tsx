@@ -1,14 +1,11 @@
-import Link from "next/link";
 import type { HomeOverview } from "@/core/domain/home";
 import { toneClasses } from "@/shared/design/tokens";
-import { Button } from "@/shared/ui/button";
-import { ArrowRightIcon } from "@/shared/ui/icons";
 import { Panel } from "@/shared/ui/panel";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { ProjectPipeline } from "./project-pipeline";
 import { ProductSystems } from "./product-systems";
 import { ServiceQueue } from "./service-queue";
-import { SystemVisual } from "./system-visual";
+import { WeatherHero } from "./weather-hero";
 
 type HomePageProps = {
   overview: HomeOverview;
@@ -17,72 +14,7 @@ type HomePageProps = {
 export function HomePage({ overview }: HomePageProps) {
   return (
     <main className="min-h-screen bg-[var(--background)] text-zinc-950">
-      <header className="border-b border-zinc-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="text-lg font-bold tracking-normal text-zinc-950"
-          >
-            ALUXIL
-          </Link>
-          <nav aria-label="Primary navigation" className="hidden md:block">
-            <ul className="flex items-center gap-6 text-sm font-medium text-zinc-600">
-              <li>
-                <a className="transition hover:text-zinc-950" href="#projects">
-                  Projects
-                </a>
-              </li>
-              <li>
-                <a className="transition hover:text-zinc-950" href="#systems">
-                  Systems
-                </a>
-              </li>
-              <li>
-                <a className="transition hover:text-zinc-950" href="#services">
-                  Services
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <Button
-            href="/api/overview"
-            variant="secondary"
-            icon={<ArrowRightIcon className="h-4 w-4" />}
-          >
-            Mock API
-          </Button>
-        </div>
-      </header>
-
-      <section className="border-b border-zinc-200 bg-zinc-50">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-6 lg:grid-cols-[1fr_0.86fr] lg:px-8 lg:py-16">
-          <div className="flex flex-col justify-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-cyan-700">
-              Frontend demonstration
-            </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-normal text-zinc-950 sm:text-5xl">
-              Operations workspace for aluminum systems teams.
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-              A Next.js and TypeScript foundation with clean boundaries,
-              reusable UI primitives, and mock services that keep the demo fully
-              functional while real APIs are still taking shape.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button
-                href="#projects"
-                icon={<ArrowRightIcon className="h-4 w-4" />}
-              >
-                View project flow
-              </Button>
-              <Button href="#systems" variant="secondary">
-                Explore systems
-              </Button>
-            </div>
-          </div>
-          <SystemVisual />
-        </div>
-      </section>
+      <WeatherHero />
 
       <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
