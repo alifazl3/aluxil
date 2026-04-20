@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ALUXIL Frontend
+
+A demonstration frontend for ALUXIL built with Next.js, TypeScript, Tailwind CSS, and a clean architecture that keeps UI, use cases, domain contracts, and data providers separate.
+
+## Tech Stack
+
+- Next.js App Router
+- React and TypeScript
+- Tailwind CSS 4
+- ESLint and TypeScript checks
+- Typed mock services for demonstration APIs
+
+This local setup pins wasm compiler packages for Next.js, Tailwind, and Lightning CSS, then uses Webpack for `dev` and `build` scripts because native compiler binaries can be blocked by macOS code-signing restrictions in this environment.
 
 ## Getting Started
 
-First, run the development server:
+Use `pnpm` for package management.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev
+pnpm lint
+pnpm typecheck
+pnpm build
+```
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+The project uses explicit layers:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app`: Next.js routing, metadata, and API route handlers.
+- `src/core/domain`: domain models and shared business language.
+- `src/core/ports`: contracts for replaceable dependencies.
+- `src/application`: use cases that orchestrate data for screens and APIs.
+- `src/infrastructure`: concrete implementations, including mock providers.
+- `src/presentation`: page-level UI composition.
+- `src/shared`: design tokens, reusable UI primitives, utilities, and config.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The home page calls `getHomeOverview()` from the application layer. That use case depends on the `HomeOverviewProvider` port and currently uses `mockHomeOverviewProvider`. Real API clients can replace the mock provider without rewriting presentation components.
 
-## Deploy on Vercel
+## Mock APIs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The demo exposes a typed mock endpoint:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+GET /api/overview
+```
+
+The route delegates to the same application use case used by the page, so mock data is defined in one place: `src/infrastructure/mock/home-overview.mock.ts`.
+
+## Design System
+
+Reusable primitives live in `src/shared/ui`, and shared design constants live in `src/shared/design`. Global CSS is limited to Tailwind setup, CSS variables, and base browser behavior.
+
+## Agent Rules
+
+Repository rules for future coding agents live in `AGENTS.md`. They cover Next.js version guidance, architecture boundaries, mock-service expectations, design-system usage, checks, and incremental commits.
