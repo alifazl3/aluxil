@@ -218,30 +218,38 @@ export function WeatherHero({ locale, onLocaleChange }: WeatherHeroProps) {
       className="relative h-[320vh] bg-[#111322]"
       style={heroStyle}
     >
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
-        <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+      <header className="fixed inset-x-0 top-0 z-50 overflow-x-clip border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
+        <div className="mx-auto flex h-11 w-full max-w-7xl min-w-0 items-center justify-between gap-3 px-5 sm:px-6 lg:px-8">
           <Link href="/" className="text-sm font-bold tracking-normal text-white">
             Aluxil
           </Link>
-          <div className="flex items-center gap-5">
-            <nav aria-label="Primary navigation" className="hidden md:block">
-              <ul className="flex items-center gap-8 text-xs font-medium text-white/72">
+          <div className="flex min-w-0 items-center gap-3">
+            <nav
+              aria-label="Primary navigation"
+              className="hidden min-w-0 md:block"
+            >
+              <ul className="flex min-w-0 items-center gap-4 text-[11px] font-medium text-white/72 lg:gap-7 lg:text-xs">
                 {navItems[locale].map((item) => (
                   <li key={`${item.href}-${item.label}`}>
-                    <a className="transition hover:text-white" href={item.href}>
+                    <a
+                      className="whitespace-nowrap transition hover:text-white"
+                      href={item.href}
+                    >
                       {item.label}
                     </a>
                   </li>
                 ))}
               </ul>
             </nav>
-            <div className="flex items-center gap-1 text-[10px] font-semibold text-white/48">
+            <div className="flex shrink-0 items-center gap-2 text-xs font-semibold">
               {(["de", "en"] as const).map((item) => (
                 <button
                   key={item}
                   type="button"
-                  className={`rounded-sm px-1.5 py-0.5 transition ${
-                    locale === item ? "text-white" : "hover:text-white/78"
+                  className={`flex h-8 min-w-14 items-center justify-center rounded-full px-4 transition ${
+                    locale === item
+                      ? "bg-[#f3eee7] text-zinc-950"
+                      : "bg-black/70 text-white/74 hover:bg-black/82 hover:text-white"
                   }`}
                   onClick={() => onLocaleChange(item)}
                 >
