@@ -14,6 +14,10 @@ export function WeatherHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
   const [flash, setFlash] = useState(false);
+  const [lightning, setLightning] = useState({
+    duration: 1040,
+    peak: 0.2,
+  });
 
   useEffect(() => {
     const updateProgress = () => {
@@ -61,11 +65,14 @@ export function WeatherHero() {
   const snowFlakes = useMemo(
     () =>
       Array.from({ length: 468 }, (_, index) => {
+        const massive = index % 157 === 0;
         const giant = index % 47 === 0;
-        const near = !giant && (index % 19 === 0 || index % 31 === 0);
+        const near = !massive && !giant && (index % 19 === 0 || index % 31 === 0);
         const mid = !near && index % 7 === 0;
-        const size = giant
-          ? 22 + (index % 4) * 2.8
+        const size = massive
+          ? 46 + (index % 3) * 8
+          : giant
+            ? 22 + (index % 4) * 2.8
           : near
             ? 11 + (index % 5) * 1.8
             : mid
@@ -77,8 +84,10 @@ export function WeatherHero() {
           left: (index * 19 + (index % 13) * 4 + Math.floor(index / 9)) % 101,
           delay: `${(index % 29) * -0.2}s`,
           duration: `${
-            giant
-              ? 11.4 + (index % 3) * 0.7
+            massive
+              ? 14.5 + (index % 3) * 1.1
+              : giant
+                ? 11.4 + (index % 3) * 0.7
               : near
                 ? 9.6 + (index % 5) * 0.52
                 : 5.4 + (index % 9) * 0.34
@@ -86,15 +95,17 @@ export function WeatherHero() {
           size: `${size}px`,
           drift: `${(index % 2 === 0 ? 1 : -1) * (24 + (index % 8) * 8)}px`,
           threshold: (index % 17) / 22,
-          blur: giant
-            ? `${2.1 + (index % 3) * 0.28}px`
+          blur: massive
+            ? `${4.2 + (index % 3) * 0.55}px`
+            : giant
+              ? `${2.1 + (index % 3) * 0.28}px`
             : near
             ? `${1.25 + (index % 4) * 0.18}px`
             : mid
               ? `${0.72 + (index % 3) * 0.12}px`
               : `${0.48 + (index % 4) * 0.1}px`,
-          maxOpacity: giant ? 0.18 : near ? 0.34 : mid ? 0.48 : 0.56,
-          minOpacity: giant ? 0.03 : near ? 0.06 : mid ? 0.1 : 0.12,
+          maxOpacity: massive ? 0.12 : giant ? 0.18 : near ? 0.34 : mid ? 0.48 : 0.56,
+          minOpacity: massive ? 0.02 : giant ? 0.03 : near ? 0.06 : mid ? 0.1 : 0.12,
         };
       }),
     [],
@@ -131,8 +142,12 @@ export function WeatherHero() {
       return;
     }
 
+    setLightning({
+      duration: 920 + Math.round(Math.random() * 360),
+      peak: 0.14 + Math.random() * 0.08,
+    });
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 180);
+    window.setTimeout(() => setFlash(false), 1320);
   };
 
   return (
@@ -174,9 +189,17 @@ export function WeatherHero() {
         </div>
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 z-30 bg-white ${
-            flash ? "animate-[hero-lightning_520ms_ease-out]" : "opacity-0"
-          }`}
+          className="pointer-events-none absolute inset-0 z-30 bg-white opacity-0"
+          style={
+            flash
+              ? ({
+                  animation: `hero-lightning ${lightning.duration}ms cubic-bezier(0.12, 0, 0.18, 1)`,
+                  "--lightning-peak": lightning.peak,
+                  "--lightning-mid": lightning.peak * 0.54,
+                  "--lightning-low": lightning.peak * 0.2,
+                } as React.CSSProperties)
+              : undefined
+          }
         />
 
         <div

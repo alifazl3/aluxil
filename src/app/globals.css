@@ -117,20 +117,36 @@ html {
     opacity: 0;
   }
 
-  18% {
-    opacity: 0.34;
+  9% {
+    opacity: var(--lightning-low);
   }
 
-  42% {
-    opacity: 0.08;
+  14% {
+    opacity: var(--lightning-peak);
   }
 
-  62% {
-    opacity: 0.22;
+  22% {
+    opacity: 0.03;
   }
 
-  82% {
-    opacity: 0.04;
+  39% {
+    opacity: var(--lightning-mid);
+  }
+
+  48% {
+    opacity: 0.02;
+  }
+
+  67% {
+    opacity: calc(var(--lightning-peak) * 0.72);
+  }
+
+  78% {
+    opacity: 0.01;
+  }
+
+  91% {
+    opacity: calc(var(--lightning-low) * 0.65);
   }
 }
 
