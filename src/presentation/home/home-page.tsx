@@ -10,6 +10,7 @@ import { BenefitGrid } from "./benefit-grid";
 import { ContactSection } from "./contact-section";
 import { ProjectPipeline } from "./project-pipeline";
 import { ProductSystems } from "./product-systems";
+import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { Testimonials } from "./testimonials";
 import { WeatherHero } from "./weather-hero";
@@ -163,8 +164,10 @@ export function HomePage({ overview }: HomePageProps) {
   const t = useMemo(() => copy[locale], [locale]);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-zinc-950">
-      <WeatherHero locale={locale} onLocaleChange={setLocale} />
+    <>
+      <SiteHeader locale={locale} onLocaleChange={setLocale} />
+      <main className="min-h-screen bg-[var(--background)] text-zinc-950">
+        <WeatherHero locale={locale} />
 
       <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -279,6 +282,7 @@ export function HomePage({ overview }: HomePageProps) {
       />
       <ContactSection contact={content.contact} copy={t.contact} />
       <SiteFooter contact={content.contact} copy={t.footer} />
-    </main>
+      </main>
+    </>
   );
 }
