@@ -46,7 +46,7 @@ export function WeatherHero() {
         const depth = index % 9;
 
         return {
-        id: `rain-${index}`,
+          id: `rain-${index}`,
           left: (index * 17 + (index % 11) * 5 + Math.floor(index / 7)) % 101,
           delay: `${(index % 31) * -0.09}s`,
           duration: 0.74 + (depth % 5) * 0.12,
@@ -60,24 +60,32 @@ export function WeatherHero() {
 
   const snowFlakes = useMemo(
     () =>
-      Array.from({ length: 126 }, (_, index) => {
+      Array.from({ length: 189 }, (_, index) => {
         const near = index % 11 === 0 || index % 17 === 0;
         const mid = index % 5 === 0;
         const size = near
-          ? 10 + (index % 5) * 1.6
+          ? 11 + (index % 5) * 1.8
           : mid
             ? 6 + (index % 4) * 1.1
             : 2.4 + (index % 5) * 0.8;
 
         return {
-        id: `snow-${index}`,
+          id: `snow-${index}`,
           left: (index * 19 + (index % 13) * 4 + Math.floor(index / 9)) % 101,
           delay: `${(index % 29) * -0.2}s`,
-          duration: `${near ? 8.8 + (index % 5) * 0.45 : 5.2 + (index % 9) * 0.34}s`,
+          duration: `${
+            near ? 9.6 + (index % 5) * 0.52 : 5.4 + (index % 9) * 0.34
+          }s`,
           size: `${size}px`,
           drift: `${(index % 2 === 0 ? 1 : -1) * (24 + (index % 8) * 8)}px`,
-          threshold: (index % 13) / 18,
-          blur: near ? "0px" : mid ? "0.2px" : "0.45px",
+          threshold: (index % 17) / 22,
+          blur: near
+            ? `${1.25 + (index % 4) * 0.18}px`
+            : mid
+              ? `${0.72 + (index % 3) * 0.12}px`
+              : `${0.48 + (index % 4) * 0.1}px`,
+          maxOpacity: near ? 0.34 : mid ? 0.48 : 0.56,
+          minOpacity: near ? 0.06 : mid ? 0.1 : 0.12,
         };
       }),
     [],
@@ -91,8 +99,8 @@ export function WeatherHero() {
   const nightOpacity = clamp((progress - 0.12) / 0.34);
   const overlayOpacity = 0.18 + progress * 0.32;
   const sliderPosition = `${progress * 100}%`;
-  const lensFlareOpacity = clamp((0.34 - progress) / 0.22);
-  const lensFlareRotation = `${progress * 42}deg`;
+  const lensFlareOpacity = clamp((0.34 - progress) / 0.22) * 0.3;
+  const lensFlareRotation = `${progress * -42}deg`;
 
   const heroStyle = {
     "--night-opacity": nightOpacity,
@@ -197,8 +205,8 @@ export function WeatherHero() {
                   animationDuration: flake.duration,
                   opacity:
                     snowOpacity > flake.threshold
-                      ? 0.25 + snowOpacity * 0.6
-                      : snowOpacity * 0.18,
+                      ? flake.minOpacity + snowOpacity * flake.maxOpacity
+                      : snowOpacity * flake.minOpacity,
                   filter: `blur(${flake.blur})`,
                   "--flake-drift": flake.drift,
                 } as React.CSSProperties

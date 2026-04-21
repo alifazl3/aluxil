@@ -57,8 +57,13 @@ html {
   position: absolute;
   top: -10%;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.38);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.78) 0 34%,
+    rgba(255, 255, 255, 0.42) 55%,
+    rgba(255, 255, 255, 0) 78%
+  );
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
   animation-name: hero-snow-fall;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -67,14 +72,14 @@ html {
 
 .hero-lens-flare {
   position: absolute;
-  left: 3%;
-  top: -3%;
+  left: -6%;
+  top: -24%;
   z-index: 8;
-  width: min(520px, 58vw);
+  width: min(920px, 86vw);
   aspect-ratio: 1;
   opacity: var(--lens-flare-opacity);
   pointer-events: none;
-  transform: rotate(var(--lens-flare-rotation));
+  transform: scaleX(-1) rotate(var(--lens-flare-rotation));
   transform-origin: 50% 50%;
   transition: opacity 160ms ease-out;
   mix-blend-mode: plus-lighter;
