@@ -17,11 +17,6 @@ export function WeatherHero() {
   const [lightning, setLightning] = useState({
     duration: 1040,
     peak: 0.2,
-    boltDuration: 820,
-    boltLeft: 58,
-    boltTop: 9,
-    boltRotate: -18,
-    boltPeak: 0.18,
   });
 
   useEffect(() => {
@@ -133,35 +128,11 @@ export function WeatherHero() {
     [],
   );
 
-  const extraSmallSnowFlakes = useMemo(
-    () =>
-      Array.from({ length: 840 }, (_, index) => {
-        const mid = index % 6 === 0;
-        const size = mid ? 4.2 + (index % 4) * 0.85 : 1.2 + (index % 7) * 0.52;
-
-        return {
-          id: `extra-snow-${index}`,
-          left:
-            (index * 23 + (index % 17) * 3 + Math.floor(index / 11)) % 101,
-          delay: `${(index % 37) * -0.12}s`,
-          duration: `${mid ? 6.8 + (index % 7) * 0.28 : 4.7 + (index % 10) * 0.22}s`,
-          size: `${size}px`,
-          drift: `${(index % 2 === 0 ? 1 : -1) * (18 + (index % 10) * 5)}px`,
-          threshold: (index % 19) / 19,
-          blur: `${mid ? 0.62 + (index % 3) * 0.1 : 0.38 + (index % 4) * 0.08}px`,
-          maxOpacity: mid ? 0.42 : 0.5,
-          minOpacity: mid ? 0.08 : 0.1,
-        };
-      }),
-    [],
-  );
-
   const rainBuild = clamp((progress - 0.28) / 0.36);
   const rainFade = clamp((0.94 - progress) / 0.26);
   const rainPower = rainBuild * rainFade;
   const rainOpacity = rainPower * 0.86;
   const snowOpacity = clamp((progress - 0.62) / 0.32);
-  const extraSnowOpacity = clamp((progress - 0.72) / 0.24);
   const nightOpacity = clamp((progress - 0.12) / 0.34);
   const overlayOpacity = 0.18 + progress * 0.32;
   const sliderPosition = `${progress * 100}%`;
@@ -191,11 +162,6 @@ export function WeatherHero() {
     setLightning({
       duration: 920 + Math.round(Math.random() * 360),
       peak: 0.14 + Math.random() * 0.08,
-      boltDuration: 760 + Math.round(Math.random() * 520),
-      boltLeft: 46 + Math.random() * 26,
-      boltTop: 4 + Math.random() * 16,
-      boltRotate: -28 + Math.random() * 32,
-      boltPeak: 0.12 + Math.random() * 0.1,
     });
     setFlash(true);
     window.setTimeout(() => setFlash(false), 1320);
@@ -240,7 +206,7 @@ export function WeatherHero() {
         </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-30 bg-white opacity-0"
+          className="hero-lightning-overlay"
           style={
             flash
               ? ({
@@ -248,22 +214,6 @@ export function WeatherHero() {
                   "--lightning-peak": lightning.peak,
                   "--lightning-mid": lightning.peak * 0.54,
                   "--lightning-low": lightning.peak * 0.2,
-                } as React.CSSProperties)
-              : undefined
-          }
-        />
-        <div
-          aria-hidden="true"
-          className="hero-lightning-bolt"
-          style={
-            flash
-              ? ({
-                  left: `${lightning.boltLeft}%`,
-                  top: `${lightning.boltTop}%`,
-                  animation: `hero-lightning-bolt ${lightning.boltDuration}ms cubic-bezier(0.14, 0, 0.1, 1)`,
-                  "--bolt-rotate": `${lightning.boltRotate}deg`,
-                  "--bolt-peak": lightning.boltPeak,
-                  "--bolt-mid": lightning.boltPeak * 0.48,
                 } as React.CSSProperties)
               : undefined
           }
@@ -317,30 +267,6 @@ export function WeatherHero() {
               }
             />
           ))}
-          {extraSnowOpacity > 0
-            ? extraSmallSnowFlakes.map((flake) => (
-                <span
-                  key={flake.id}
-                  className="hero-snow-flake"
-                  style={
-                    {
-                      left: `${flake.left}%`,
-                      width: flake.size,
-                      height: flake.size,
-                      animationDelay: flake.delay,
-                      animationDuration: flake.duration,
-                      opacity:
-                        extraSnowOpacity > flake.threshold
-                          ? flake.minOpacity +
-                            extraSnowOpacity * flake.maxOpacity
-                          : extraSnowOpacity * flake.minOpacity,
-                      filter: `blur(${flake.blur})`,
-                      "--flake-drift": flake.drift,
-                    } as React.CSSProperties
-                  }
-                />
-              ))
-            : null}
         </div>
 
         <header className="absolute inset-x-0 top-0 z-20 border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
@@ -369,22 +295,7 @@ export function WeatherHero() {
           <div className="mb-2 flex items-center justify-between px-1 text-base font-semibold leading-none text-white/78 sm:text-lg">
             <span>☀</span>
             <span>☁</span>
-            <span aria-label="rain" role="img">
-              <svg
-                className="h-[1.05em] w-[1.05em] drop-shadow-[0_1px_5px_rgba(0,0,0,0.45)]"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.9"
-              >
-                <path d="M4 12a8 8 0 0 1 16 0Z" />
-                <path d="M12 12v5.2a2 2 0 0 1-3.6 1.2" />
-                <path d="M8.2 12a3.8 3.8 0 0 1 7.6 0" />
-              </svg>
-            </span>
+            <span>☔</span>
             <span>❄</span>
           </div>
           <div className="relative h-4 rounded-full border border-white/25 bg-white/18 shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
