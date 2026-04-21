@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/core/domain/home";
 
 const navItems = {
@@ -218,6 +218,40 @@ export function WeatherHero({ locale, onLocaleChange }: WeatherHeroProps) {
       className="relative h-[320vh] bg-[#111322]"
       style={heroStyle}
     >
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
+        <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+          <Link href="/" className="text-sm font-bold tracking-normal text-white">
+            Aluxil
+          </Link>
+          <div className="flex items-center gap-5">
+            <nav aria-label="Primary navigation" className="hidden md:block">
+              <ul className="flex items-center gap-8 text-xs font-medium text-white/72">
+                {navItems[locale].map((item) => (
+                  <li key={`${item.href}-${item.label}`}>
+                    <a className="transition hover:text-white" href={item.href}>
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <div className="flex items-center gap-1 text-[10px] font-semibold text-white/48">
+              {(["de", "en"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`rounded-sm px-1.5 py-0.5 transition ${
+                    locale === item ? "text-white" : "hover:text-white/78"
+                  }`}
+                  onClick={() => onLocaleChange(item)}
+                >
+                  {item.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
       <div
         className="sticky top-0 h-screen min-h-[620px] overflow-hidden bg-[#111322] text-white"
         onClick={handleHeroClick}
@@ -308,44 +342,6 @@ export function WeatherHero({ locale, onLocaleChange }: WeatherHeroProps) {
             />
           ))}
         </div>
-
-        <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
-          <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-            <Link href="/" className="text-sm font-bold tracking-normal">
-              Aluxil
-            </Link>
-            <div className="flex items-center gap-6">
-              <nav aria-label="Primary navigation" className="hidden md:block">
-                <ul className="flex items-center gap-8 text-xs font-medium text-white/72">
-                  {navItems[locale].map((item) => (
-                    <li key={`${item.href}-${item.label}`}>
-                      <a className="transition hover:text-white" href={item.href}>
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-              <div
-                className="flex rounded-md border border-white/15 bg-white/10 p-0.5 text-[11px] font-semibold text-white/72"
-                onClick={(event) => event.stopPropagation()}
-              >
-                {(["de", "en"] as const).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`rounded px-2 py-1 transition ${
-                      locale === item ? "bg-white text-zinc-950" : "hover:text-white"
-                    }`}
-                    onClick={() => onLocaleChange(item)}
-                  >
-                    {item.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </header>
 
         <div
           className="absolute left-1/2 top-[58px] z-20 w-[min(280px,68vw)] -translate-x-1/2"
