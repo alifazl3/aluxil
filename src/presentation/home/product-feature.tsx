@@ -25,7 +25,7 @@ const products = {
   },
   aw110: {
     name: "AW110 System",
-    image: "/products/aw110.jpg",
+    image: "/products/aw110.png",
     imageFit: "tall",
     options: [
       { size: "340 x 340 cm / 2 posts", price: "EUR 3,490" },
