@@ -425,6 +425,10 @@ html {
   text-align: left;
 }
 
+.product-feature-section__description-body {
+  font-weight: 380;
+}
+
 .product-feature-section__visual {
   position: relative;
   align-self: center;

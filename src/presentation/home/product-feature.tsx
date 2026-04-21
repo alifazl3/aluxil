@@ -124,7 +124,7 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
                   className={
                     index === 0
                       ? "product-feature-section__description-title"
-                      : undefined
+                      : "product-feature-section__description-body"
                   }
                 >
                   {line}
