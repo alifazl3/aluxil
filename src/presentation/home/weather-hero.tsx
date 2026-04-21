@@ -60,14 +60,14 @@ export function WeatherHero() {
 
   const snowFlakes = useMemo(
     () =>
-      Array.from({ length: 189 }, (_, index) => {
-        const near = index % 11 === 0 || index % 17 === 0;
-        const mid = index % 5 === 0;
+      Array.from({ length: 234 }, (_, index) => {
+        const near = index % 19 === 0 || index % 31 === 0;
+        const mid = !near && index % 7 === 0;
         const size = near
           ? 11 + (index % 5) * 1.8
           : mid
             ? 6 + (index % 4) * 1.1
-            : 2.4 + (index % 5) * 0.8;
+            : 1.8 + (index % 6) * 0.72;
 
         return {
           id: `snow-${index}`,
@@ -99,7 +99,7 @@ export function WeatherHero() {
   const nightOpacity = clamp((progress - 0.12) / 0.34);
   const overlayOpacity = 0.18 + progress * 0.32;
   const sliderPosition = `${progress * 100}%`;
-  const lensFlareOpacity = clamp((0.34 - progress) / 0.22) * 0.3;
+  const lensFlareOpacity = clamp((0.34 - progress) / 0.22) * 0.44;
   const lensFlareRotation = `${progress * -42}deg`;
 
   const heroStyle = {
@@ -161,7 +161,7 @@ export function WeatherHero() {
         <div
           aria-hidden="true"
           className={`pointer-events-none absolute inset-0 z-30 bg-white ${
-            flash ? "animate-[hero-lightning_180ms_ease-out]" : "opacity-0"
+            flash ? "animate-[hero-lightning_520ms_ease-out]" : "opacity-0"
           }`}
         />
 
