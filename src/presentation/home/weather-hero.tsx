@@ -42,28 +42,44 @@ export function WeatherHero() {
 
   const rainDrops = useMemo(
     () =>
-      Array.from({ length: 46 }, (_, index) => ({
+      Array.from({ length: 132 }, (_, index) => {
+        const depth = index % 9;
+
+        return {
         id: `rain-${index}`,
-        left: (index * 29 + (index % 5) * 7) % 101,
-        delay: `${(index % 17) * -0.18}s`,
-        duration: 1.2 + (index % 6) * 0.12,
-        height: 24 + (index % 7) * 6,
-        threshold: (index % 10) / 10,
-      })),
+          left: (index * 17 + (index % 11) * 5 + Math.floor(index / 7)) % 101,
+          delay: `${(index % 31) * -0.09}s`,
+          duration: 0.74 + (depth % 5) * 0.12,
+          height: 18 + depth * 5 + (index % 3) * 7,
+          width: 0.8 + (index % 4) * 0.22,
+          threshold: (index % 14) / 18,
+        };
+      }),
     [],
   );
 
   const snowFlakes = useMemo(
     () =>
-      Array.from({ length: 54 }, (_, index) => ({
+      Array.from({ length: 126 }, (_, index) => {
+        const near = index % 11 === 0 || index % 17 === 0;
+        const mid = index % 5 === 0;
+        const size = near
+          ? 10 + (index % 5) * 1.6
+          : mid
+            ? 6 + (index % 4) * 1.1
+            : 2.4 + (index % 5) * 0.8;
+
+        return {
         id: `snow-${index}`,
-        left: (index * 37 + (index % 6) * 5) % 101,
-        delay: `${(index % 19) * -0.28}s`,
-        duration: `${5.8 + (index % 8) * 0.38}s`,
-        size: `${3 + (index % 4)}px`,
-        drift: `${index % 2 === 0 ? 42 : -38}px`,
-        threshold: (index % 9) / 9,
-      })),
+          left: (index * 19 + (index % 13) * 4 + Math.floor(index / 9)) % 101,
+          delay: `${(index % 29) * -0.2}s`,
+          duration: `${near ? 8.8 + (index % 5) * 0.45 : 5.2 + (index % 9) * 0.34}s`,
+          size: `${size}px`,
+          drift: `${(index % 2 === 0 ? 1 : -1) * (24 + (index % 8) * 8)}px`,
+          threshold: (index % 13) / 18,
+          blur: near ? "0px" : mid ? "0.2px" : "0.45px",
+        };
+      }),
     [],
   );
 
@@ -126,11 +142,13 @@ export function WeatherHero() {
         />
         <div className="absolute inset-0 bg-[#050814] opacity-[var(--hero-overlay-opacity)]" />
         <div className="hero-lens-flare" aria-hidden="true">
-          <span className="hero-lens-flare__core" />
-          <span className="hero-lens-flare__ray hero-lens-flare__ray--wide" />
-          <span className="hero-lens-flare__ray" />
-          <span className="hero-lens-flare__spot hero-lens-flare__spot--one" />
-          <span className="hero-lens-flare__spot hero-lens-flare__spot--two" />
+          <Image
+            src="/hero/lens-flare.png"
+            alt=""
+            fill
+            sizes="(max-width: 768px) 68vw, 520px"
+            className="object-contain"
+          />
         </div>
         <div
           aria-hidden="true"
@@ -152,10 +170,11 @@ export function WeatherHero() {
                 animationDelay: drop.delay,
                 animationDuration: `${drop.duration - rainPower * 0.45}s`,
                 height: `${drop.height + rainPower * 18}px`,
+                width: `${drop.width + rainPower * 0.26}px`,
                 opacity:
                   rainPower > drop.threshold
-                    ? 0.18 + rainPower * 0.62
-                    : rainPower * 0.12,
+                    ? 0.2 + rainPower * 0.68
+                    : rainPower * 0.18,
               }}
             />
           ))}
@@ -178,8 +197,9 @@ export function WeatherHero() {
                   animationDuration: flake.duration,
                   opacity:
                     snowOpacity > flake.threshold
-                      ? 0.22 + snowOpacity * 0.58
-                      : snowOpacity * 0.16,
+                      ? 0.25 + snowOpacity * 0.6
+                      : snowOpacity * 0.18,
+                  filter: `blur(${flake.blur})`,
                   "--flake-drift": flake.drift,
                 } as React.CSSProperties
               }
