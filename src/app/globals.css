@@ -85,7 +85,7 @@ html {
       0
     )
     rotate(var(--lens-flare-rotation)) scaleX(-1);
-  transform-origin: 50% 50%;
+  transform-origin: 66% 27%;
   transition: opacity 160ms ease-out;
   mix-blend-mode: plus-lighter;
   filter: brightness(1.3) saturate(1.12);

@@ -60,7 +60,7 @@ export function WeatherHero() {
 
   const snowFlakes = useMemo(
     () =>
-      Array.from({ length: 234 }, (_, index) => {
+      Array.from({ length: 468 }, (_, index) => {
         const giant = index % 47 === 0;
         const near = !giant && (index % 19 === 0 || index % 31 === 0);
         const mid = !near && index % 7 === 0;
