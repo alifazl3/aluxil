@@ -32,9 +32,41 @@ export type ServiceRequest = {
   eta: string;
 };
 
+export type SiteBenefit = {
+  id: string;
+  title: string;
+  description: string;
+};
+
+export type AudienceSegment = {
+  id: string;
+  title: string;
+};
+
+export type Testimonial = {
+  id: string;
+  quote: string;
+  author: string;
+  location: string;
+  initials: string;
+};
+
+export type ContactProfile = {
+  phone: string;
+  email: string;
+  hours: string;
+  responseTime: string;
+  address: string[];
+  privacyNote: string;
+};
+
 export type HomeOverview = {
   metrics: DashboardMetric[];
   projects: ProjectSummary[];
   products: ProductLine[];
   requests: ServiceRequest[];
+  benefits: SiteBenefit[];
+  audiences: AudienceSegment[];
+  testimonials: Testimonial[];
+  contact: ContactProfile;
 };

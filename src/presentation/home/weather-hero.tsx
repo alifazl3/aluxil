@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const navItems = ["Schiebe", "Daecher", "Pergola", "Markisen", "Kontakt"];
+import { ArrowRightIcon } from "@/shared/ui/icons";
 
 function clamp(value: number) {
   return Math.min(Math.max(value, 0), 1);
@@ -283,27 +281,8 @@ export function WeatherHero() {
           ))}
         </div>
 
-        <header className="absolute inset-x-0 top-0 z-20 border-b border-white/10 bg-[#020617]/72 backdrop-blur-md">
-          <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-            <Link href="/" className="text-sm font-bold tracking-normal">
-              Aluxil
-            </Link>
-            <nav aria-label="Primary navigation" className="hidden md:block">
-              <ul className="flex items-center gap-8 text-xs font-medium text-white/72">
-                {navItems.map((item) => (
-                  <li key={item}>
-                    <a className="transition hover:text-white" href="#projects">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        </header>
-
         <div
-          className="absolute left-1/2 top-[58px] z-20 w-[min(280px,68vw)] -translate-x-1/2"
+          className="absolute left-1/2 top-[76px] z-20 w-[min(280px,68vw)] -translate-x-1/2"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="mb-2 flex items-center justify-between px-1 text-base font-semibold leading-none text-white/78 sm:text-lg">
@@ -337,11 +316,27 @@ export function WeatherHero() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 top-[19%] z-10">
+        <div className="absolute inset-x-0 top-[21%] z-10">
           <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
             <h1 className="max-w-[560px] text-4xl font-bold leading-[1.08] tracking-normal text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.48)] sm:text-5xl lg:text-6xl">
-              Aluminium Terrassendächer & Überdachungen
+              Aluminium patio roofs & canopies
             </h1>
+            <p className="mt-5 max-w-[520px] text-base font-medium leading-7 text-white/84 drop-shadow-[0_3px_16px_rgba(0,0,0,0.5)] sm:text-lg">
+              High-quality systems for patios, gardens, and carports by ALUXIL.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <a
+                href="#contact"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-white px-4 text-sm font-semibold text-zinc-950 shadow-[0_14px_38px_rgba(0,0,0,0.2)] transition hover:bg-cyan-50"
+                onClick={(event) => event.stopPropagation()}
+              >
+                Start configuration
+                <ArrowRightIcon className="h-4 w-4" />
+              </a>
+              <span className="text-sm font-semibold text-white/82">
+                Free delivery within Germany
+              </span>
+            </div>
           </div>
         </div>
       </div>

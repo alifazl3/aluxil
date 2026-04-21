@@ -38,7 +38,7 @@ export function ServiceQueue({ requests }: ServiceQueueProps) {
                 {priorityLabels[request.priority]}
               </Badge>
             </div>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+            <p className="mt-4 text-xs font-semibold uppercase tracking-normal text-zinc-500">
               ETA {request.eta}
             </p>
           </article>

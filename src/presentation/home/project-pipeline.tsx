@@ -22,11 +22,11 @@ export function ProjectPipeline({ projects }: ProjectPipelineProps) {
             Project pipeline
           </h3>
           <p className="mt-1 text-sm text-zinc-600">
-            Mocked API data for schedule, phase, and installation readiness.
+            Demo service data for schedule, phase, and installation readiness.
           </p>
         </div>
         <Badge className="border-zinc-200 bg-zinc-50 text-zinc-700">
-          Live demo
+          English demo
         </Badge>
       </div>
 
@@ -37,7 +37,7 @@ export function ProjectPipeline({ projects }: ProjectPipelineProps) {
               <div>
                 <h4 className="font-semibold text-zinc-950">{project.name}</h4>
                 <p className="mt-1 text-sm text-zinc-600">
-                  {project.location} · due {project.dueDate}
+                  {project.location} / target {project.dueDate}
                 </p>
               </div>
               <Badge className={statusTone[project.status]}>

@@ -9,7 +9,7 @@ export function SystemVisual() {
           <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10">
             <LayersIcon className="h-5 w-5" />
           </div>
-          <div className="rounded-md border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100">
+          <div className="rounded-md border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-normal text-cyan-100">
             Facade system
           </div>
         </div>

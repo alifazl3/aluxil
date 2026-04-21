@@ -1,5 +1,5 @@
 export const siteConfig = {
   name: "ALUXIL",
   description:
-    "A demonstration frontend for aluminum project operations, product systems, and client service workflows.",
+    "English ALUXIL demonstration site for aluminium patio roofs, canopy systems, consultation, and installation services.",
 };
