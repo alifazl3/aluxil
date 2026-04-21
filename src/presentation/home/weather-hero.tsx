@@ -61,31 +61,40 @@ export function WeatherHero() {
   const snowFlakes = useMemo(
     () =>
       Array.from({ length: 234 }, (_, index) => {
-        const near = index % 19 === 0 || index % 31 === 0;
+        const giant = index % 47 === 0;
+        const near = !giant && (index % 19 === 0 || index % 31 === 0);
         const mid = !near && index % 7 === 0;
-        const size = near
-          ? 11 + (index % 5) * 1.8
-          : mid
-            ? 6 + (index % 4) * 1.1
-            : 1.8 + (index % 6) * 0.72;
+        const size = giant
+          ? 22 + (index % 4) * 2.8
+          : near
+            ? 11 + (index % 5) * 1.8
+            : mid
+              ? 6 + (index % 4) * 1.1
+              : 1.8 + (index % 6) * 0.72;
 
         return {
           id: `snow-${index}`,
           left: (index * 19 + (index % 13) * 4 + Math.floor(index / 9)) % 101,
           delay: `${(index % 29) * -0.2}s`,
           duration: `${
-            near ? 9.6 + (index % 5) * 0.52 : 5.4 + (index % 9) * 0.34
+            giant
+              ? 11.4 + (index % 3) * 0.7
+              : near
+                ? 9.6 + (index % 5) * 0.52
+                : 5.4 + (index % 9) * 0.34
           }s`,
           size: `${size}px`,
           drift: `${(index % 2 === 0 ? 1 : -1) * (24 + (index % 8) * 8)}px`,
           threshold: (index % 17) / 22,
-          blur: near
+          blur: giant
+            ? `${2.1 + (index % 3) * 0.28}px`
+            : near
             ? `${1.25 + (index % 4) * 0.18}px`
             : mid
               ? `${0.72 + (index % 3) * 0.12}px`
               : `${0.48 + (index % 4) * 0.1}px`,
-          maxOpacity: near ? 0.34 : mid ? 0.48 : 0.56,
-          minOpacity: near ? 0.06 : mid ? 0.1 : 0.12,
+          maxOpacity: giant ? 0.18 : near ? 0.34 : mid ? 0.48 : 0.56,
+          minOpacity: giant ? 0.03 : near ? 0.06 : mid ? 0.1 : 0.12,
         };
       }),
     [],
@@ -100,7 +109,10 @@ export function WeatherHero() {
   const overlayOpacity = 0.18 + progress * 0.32;
   const sliderPosition = `${progress * 100}%`;
   const lensFlareOpacity = clamp((0.34 - progress) / 0.22) * 0.44;
-  const lensFlareRotation = `${progress * -42}deg`;
+  const lensFlareTravel = clamp(progress / 0.34);
+  const lensFlareRotation = `${progress * -58}deg`;
+  const lensFlareX = `${36 - lensFlareTravel * 76}px`;
+  const lensFlareY = `${54 - lensFlareTravel * 86}px`;
 
   const heroStyle = {
     "--night-opacity": nightOpacity,
@@ -110,6 +122,8 @@ export function WeatherHero() {
     "--slider-position": sliderPosition,
     "--lens-flare-opacity": lensFlareOpacity,
     "--lens-flare-rotation": lensFlareRotation,
+    "--lens-flare-x": lensFlareX,
+    "--lens-flare-y": lensFlareY,
   } as React.CSSProperties;
 
   const handleHeroClick = () => {
@@ -238,7 +252,7 @@ export function WeatherHero() {
           className="absolute left-1/2 top-[58px] z-20 w-[min(280px,68vw)] -translate-x-1/2"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-white/72">
+          <div className="mb-2 flex items-center justify-between px-1 text-base font-semibold leading-none text-white/78 sm:text-lg">
             <span>☀</span>
             <span>☁</span>
             <span>☔</span>

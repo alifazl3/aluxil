@@ -79,7 +79,12 @@ html {
   aspect-ratio: 1;
   opacity: var(--lens-flare-opacity);
   pointer-events: none;
-  transform: scaleX(-1) rotate(var(--lens-flare-rotation));
+  transform: translate3d(
+      var(--lens-flare-x),
+      var(--lens-flare-y),
+      0
+    )
+    rotate(var(--lens-flare-rotation)) scaleX(-1);
   transform-origin: 50% 50%;
   transition: opacity 160ms ease-out;
   mix-blend-mode: plus-lighter;
