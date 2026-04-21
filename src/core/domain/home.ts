@@ -1,4 +1,5 @@
 export type ProjectStatus = "concept" | "fabrication" | "installation";
+export type Locale = "de" | "en";
 
 export type DashboardMetric = {
   label: string;
@@ -60,7 +61,7 @@ export type ContactProfile = {
   privacyNote: string;
 };
 
-export type HomeOverview = {
+export type HomeContent = {
   metrics: DashboardMetric[];
   projects: ProjectSummary[];
   products: ProductLine[];
@@ -69,4 +70,9 @@ export type HomeOverview = {
   audiences: AudienceSegment[];
   testimonials: Testimonial[];
   contact: ContactProfile;
+};
+
+export type HomeOverview = {
+  defaultLocale: Locale;
+  locales: Record<Locale, HomeContent>;
 };

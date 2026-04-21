@@ -4,9 +4,21 @@ import { SectionHeading } from "@/shared/ui/section-heading";
 
 type AudienceSolutionsProps = {
   audiences: AudienceSegment[];
+  eyebrow: string;
+  imageEyebrow: string;
+  imageTitle: string;
+  title: string;
+  description: string;
 };
 
-export function AudienceSolutions({ audiences }: AudienceSolutionsProps) {
+export function AudienceSolutions({
+  audiences,
+  description,
+  eyebrow,
+  imageEyebrow,
+  imageTitle,
+  title,
+}: AudienceSolutionsProps) {
   return (
     <section
       id="partners"
@@ -24,18 +36,18 @@ export function AudienceSolutions({ audiences }: AudienceSolutionsProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/62 via-zinc-950/12 to-transparent" />
           <div className="absolute bottom-0 left-0 max-w-md p-6 text-white">
             <p className="text-sm font-semibold uppercase tracking-normal text-cyan-100">
-              Custom planned
+              {imageEyebrow}
             </p>
             <h3 className="mt-2 text-2xl font-semibold tracking-normal">
-              Precisely implemented for everyday architecture.
+              {imageTitle}
             </h3>
           </div>
         </div>
         <div className="flex flex-col justify-center">
           <SectionHeading
-            eyebrow="Solutions"
-            title="Perfect canopy systems for private and professional spaces."
-            description="Whether functional, modern, or representative, every roof is tailored from the first idea through planning and installation."
+            eyebrow={eyebrow}
+            title={title}
+            description={description}
           />
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             {audiences.map((audience) => (

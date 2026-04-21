@@ -3,17 +3,19 @@ import { Panel } from "@/shared/ui/panel";
 
 type ProductSystemsProps = {
   products: ProductLine[];
+  subtitle: string;
+  title: string;
 };
 
-export function ProductSystems({ products }: ProductSystemsProps) {
+export function ProductSystems({ products, subtitle, title }: ProductSystemsProps) {
   return (
     <Panel className="overflow-hidden">
       <div className="border-b border-zinc-200 p-5 sm:p-6">
         <h3 className="text-lg font-semibold text-zinc-950">
-          Our roof systems
+          {title}
         </h3>
         <p className="mt-1 text-sm text-zinc-600">
-          Choose the model and size that fits your patio, garden, or carport.
+          {subtitle}
         </p>
       </div>
       <div className="grid divide-y divide-zinc-100 lg:grid-cols-2 lg:divide-x lg:divide-y-0">

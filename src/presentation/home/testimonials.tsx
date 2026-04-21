@@ -3,16 +3,24 @@ import { Panel } from "@/shared/ui/panel";
 import { SectionHeading } from "@/shared/ui/section-heading";
 
 type TestimonialsProps = {
+  description: string;
+  eyebrow: string;
   testimonials: Testimonial[];
+  title: string;
 };
 
-export function Testimonials({ testimonials }: TestimonialsProps) {
+export function Testimonials({
+  description,
+  eyebrow,
+  testimonials,
+  title,
+}: TestimonialsProps) {
   return (
     <section id="about" className="mx-auto max-w-7xl px-5 py-14 sm:px-6 lg:px-8">
       <SectionHeading
-        eyebrow="Customer voices"
-        title="What ALUXIL customers say"
-        description="Experiences from homeowners and project clients who needed a durable aluminium canopy with clear service."
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
       />
       <div className="mt-8 grid gap-4 lg:grid-cols-3">
         {testimonials.map((testimonial) => (

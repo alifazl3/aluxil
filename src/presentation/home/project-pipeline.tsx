@@ -10,23 +10,33 @@ const statusTone = {
 } as const;
 
 type ProjectPipelineProps = {
+  badge: string;
+  dueLabel: string;
   projects: ProjectSummary[];
+  subtitle: string;
+  title: string;
 };
 
-export function ProjectPipeline({ projects }: ProjectPipelineProps) {
+export function ProjectPipeline({
+  badge,
+  dueLabel,
+  projects,
+  subtitle,
+  title,
+}: ProjectPipelineProps) {
   return (
     <Panel className="p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-zinc-950">
-            Project pipeline
+            {title}
           </h3>
           <p className="mt-1 text-sm text-zinc-600">
-            Demo service data for schedule, phase, and installation readiness.
+            {subtitle}
           </p>
         </div>
         <Badge className="border-zinc-200 bg-zinc-50 text-zinc-700">
-          English demo
+          {badge}
         </Badge>
       </div>
 
@@ -37,7 +47,7 @@ export function ProjectPipeline({ projects }: ProjectPipelineProps) {
               <div>
                 <h4 className="font-semibold text-zinc-950">{project.name}</h4>
                 <p className="mt-1 text-sm text-zinc-600">
-                  {project.location} / target {project.dueDate}
+                  {project.location} / {dueLabel} {project.dueDate}
                 </p>
               </div>
               <Badge className={statusTone[project.status]}>
