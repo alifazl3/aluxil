@@ -161,7 +161,7 @@ export function WeatherHero() {
 
     setLightning({
       duration: 920 + Math.round(Math.random() * 360),
-      peak: 0.5,
+      peak: 1,
     });
     setFlash(true);
     window.setTimeout(() => setFlash(false), 1320);
@@ -173,6 +173,15 @@ export function WeatherHero() {
         "--lightning-peak": lightning.peak,
         "--lightning-mid": lightning.peak * 0.54,
         "--lightning-low": lightning.peak * 0.2,
+      } as React.CSSProperties)
+    : undefined;
+
+  const lightningStreakStyle = flash
+    ? ({
+        animation: `hero-lightning ${lightning.duration}ms cubic-bezier(0.12, 0, 0.18, 1)`,
+        "--lightning-peak": lightning.peak * 0.5,
+        "--lightning-mid": lightning.peak * 0.27,
+        "--lightning-low": lightning.peak * 0.1,
       } as React.CSSProperties)
     : undefined;
 
@@ -221,7 +230,7 @@ export function WeatherHero() {
         <div
           aria-hidden="true"
           className="hero-rad-lightning"
-          style={lightningStyle}
+          style={lightningStreakStyle}
         />
 
         <div
