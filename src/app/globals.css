@@ -93,15 +93,15 @@ html {
 
 .hero-lightning-overlay {
   position: absolute;
-  inset: -12%;
+  inset: 0;
   z-index: 30;
   pointer-events: none;
   opacity: 0;
-  background-image: url("/hero/lens-flare.png");
-  background-position: 62% 18%;
+  background-image: url("/hero/bargh.png");
+  background-position: center;
   background-repeat: no-repeat;
-  background-size: min(780px, 88vw);
-  filter: brightness(1.2) saturate(0.85);
+  background-size: cover;
+  filter: contrast(1.16) brightness(0.92);
   mix-blend-mode: overlay;
 }
 
