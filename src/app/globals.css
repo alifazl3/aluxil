@@ -103,17 +103,17 @@ html {
   background-size: cover;
   filter: contrast(1.16) brightness(0.92);
   mix-blend-mode: overlay;
-  --lightning-low: 0.2;
-  --lightning-mid: 0.54;
-  --lightning-peak: 1;
+  --lightning-low: 0.1;
+  --lightning-mid: 0.27;
+  --lightning-peak: 0.5;
 }
 
 .hero-rad-lightning {
   position: absolute;
   left: -3%;
   top: -2%;
-  z-index: 31;
-  width: min(560px, 48vw);
+  z-index: 19;
+  width: min(336px, 29vw);
   aspect-ratio: 724 / 736;
   pointer-events: none;
   opacity: 0;
@@ -122,10 +122,10 @@ html {
   background-repeat: no-repeat;
   background-size: contain;
   filter: brightness(1.24) saturate(1.25) contrast(1.08);
-  mix-blend-mode: plus-lighter;
-  --lightning-low: 0.2;
-  --lightning-mid: 0.54;
-  --lightning-peak: 1;
+  mix-blend-mode: screen;
+  --lightning-low: 0.1;
+  --lightning-mid: 0.27;
+  --lightning-peak: 0.5;
 }
 
 @keyframes hero-rain-fall {

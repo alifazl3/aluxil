@@ -161,7 +161,7 @@ export function WeatherHero() {
 
     setLightning({
       duration: 920 + Math.round(Math.random() * 360),
-      peak: 1,
+      peak: 0.5,
     });
     setFlash(true);
     window.setTimeout(() => setFlash(false), 1320);
