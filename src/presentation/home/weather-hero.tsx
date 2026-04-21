@@ -167,6 +167,15 @@ export function WeatherHero() {
     window.setTimeout(() => setFlash(false), 1320);
   };
 
+  const lightningStyle = flash
+    ? ({
+        animation: `hero-lightning ${lightning.duration}ms cubic-bezier(0.12, 0, 0.18, 1)`,
+        "--lightning-peak": lightning.peak,
+        "--lightning-mid": lightning.peak * 0.54,
+        "--lightning-low": lightning.peak * 0.2,
+      } as React.CSSProperties)
+    : undefined;
+
   return (
     <section
       ref={sectionRef}
@@ -207,16 +216,12 @@ export function WeatherHero() {
         <div
           aria-hidden="true"
           className="hero-lightning-overlay"
-          style={
-            flash
-              ? ({
-                  animation: `hero-lightning ${lightning.duration}ms cubic-bezier(0.12, 0, 0.18, 1)`,
-                  "--lightning-peak": lightning.peak,
-                  "--lightning-mid": lightning.peak * 0.54,
-                  "--lightning-low": lightning.peak * 0.2,
-                } as React.CSSProperties)
-              : undefined
-          }
+          style={lightningStyle}
+        />
+        <div
+          aria-hidden="true"
+          className="hero-rad-lightning"
+          style={lightningStyle}
         />
 
         <div

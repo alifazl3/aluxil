@@ -108,6 +108,26 @@ html {
   --lightning-peak: 1;
 }
 
+.hero-rad-lightning {
+  position: absolute;
+  left: -3%;
+  top: -2%;
+  z-index: 31;
+  width: min(560px, 48vw);
+  aspect-ratio: 724 / 736;
+  pointer-events: none;
+  opacity: 0;
+  background-image: url("/hero/rad.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: brightness(1.24) saturate(1.25) contrast(1.08);
+  mix-blend-mode: plus-lighter;
+  --lightning-low: 0.2;
+  --lightning-mid: 0.54;
+  --lightning-peak: 1;
+}
+
 @keyframes hero-rain-fall {
   from {
     transform: translate3d(0, -14vh, 0) rotate(12deg);
