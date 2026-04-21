@@ -115,10 +115,25 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
             ))}
           </select>
         </label>
-        <div className="product-feature-section__description" tabIndex={0}>
-          {copy.descriptions[selectedProduct].split("\n").map((line, index) =>
-            line ? <p key={`${line}-${index}`}>{line}</p> : <br key={index} />,
-          )}
+        <div className="product-feature-section__description-wrap">
+          <div className="product-feature-section__description" tabIndex={0}>
+            {copy.descriptions[selectedProduct].split("\n").map((line, index) =>
+              line ? (
+                <p
+                  key={`${line}-${index}`}
+                  className={
+                    index === 0
+                      ? "product-feature-section__description-title"
+                      : undefined
+                  }
+                >
+                  {line}
+                </p>
+              ) : (
+                <br key={index} />
+              ),
+            )}
+          </div>
         </div>
       </div>
 
