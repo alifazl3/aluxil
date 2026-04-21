@@ -103,6 +103,9 @@ html {
   background-size: cover;
   filter: contrast(1.16) brightness(0.92);
   mix-blend-mode: overlay;
+  --lightning-low: 0.2;
+  --lightning-mid: 0.54;
+  --lightning-peak: 1;
 }
 
 @keyframes hero-rain-fall {
