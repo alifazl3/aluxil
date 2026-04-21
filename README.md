@@ -32,6 +32,30 @@ pnpm typecheck
 pnpm build
 ```
 
+## CI/CD Deployment
+
+This repository includes GitHub Actions deployment workflow:
+
+- `.github/workflows/deploy-master.yml`
+
+It deploys automatically on every push to `master` (and can also be started manually with `workflow_dispatch`).
+
+Deployment flow:
+
+1. Install dependencies
+2. Run lint, typecheck, and build
+3. Sync files to `/opt/aluxil-app` on the server
+4. Build on server and restart `aluxil.service`
+5. Wait until service health check passes
+
+### Required GitHub repository secrets
+
+- `DEPLOY_HOST` (example: `93.187.70.37`)
+- `DEPLOY_PORT` (example: `2233`)
+- `DEPLOY_USER` (example: `root`)
+- `DEPLOY_SSH_KEY` (private key used by GitHub Actions)
+- `DEPLOY_KNOWN_HOSTS` (recommended host key line for strict SSH verification)
+
 ## Architecture
 
 The project uses explicit layers:
