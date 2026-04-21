@@ -81,6 +81,7 @@ const productCopy = {
 export function ProductFeature({ locale }: ProductFeatureProps) {
   const [selectedProduct, setSelectedProduct] = useState<ProductKey>("afw135");
   const [selectedSize, setSelectedSize] = useState(products.afw135.options[0].size);
+  const [isSizeOpen, setIsSizeOpen] = useState(false);
   const copy = productCopy[locale];
   const product = products[selectedProduct];
   const selectedOption = useMemo(
@@ -93,6 +94,7 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
   const handleProductChange = (value: ProductKey) => {
     setSelectedProduct(value);
     setSelectedSize(products[value].options[0].size);
+    setIsSizeOpen(false);
   };
 
   return (
@@ -165,19 +167,50 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
       </div>
 
       <div className="product-feature-section__controls">
-        <label>
+        <div
+          className={`product-feature-section__size-picker ${
+            isSizeOpen ? "product-feature-section__size-picker--open" : ""
+          }`}
+        >
           <span>{copy.dimensionLabel}</span>
-          <select
-            value={selectedSize}
-            onChange={(event) => setSelectedSize(event.currentTarget.value)}
+          <button
+            type="button"
+            className="product-feature-section__size-trigger"
+            aria-controls="product-size-menu"
+            aria-expanded={isSizeOpen}
+            aria-haspopup="listbox"
+            onClick={() => setIsSizeOpen((isOpen) => !isOpen)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                setIsSizeOpen(false);
+              }
+            }}
+          >
+            {selectedOption.size}
+          </button>
+          <div
+            id="product-size-menu"
+            className="product-feature-section__size-menu"
+            role="listbox"
+            aria-hidden={!isSizeOpen}
           >
             {product.options.map((option) => (
-              <option key={option.size} value={option.size}>
+              <button
+                key={option.size}
+                type="button"
+                role="option"
+                aria-selected={option.size === selectedSize}
+                tabIndex={isSizeOpen ? 0 : -1}
+                onClick={() => {
+                  setSelectedSize(option.size);
+                  setIsSizeOpen(false);
+                }}
+              >
                 {option.size}
-              </option>
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
         <strong>{selectedOption.price}</strong>
       </div>
     </section>
