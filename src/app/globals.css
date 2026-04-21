@@ -85,6 +85,55 @@ html {
   color: #ffffff;
 }
 
+.aluxil-site-nav__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.aluxil-sound-toggle {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.52);
+  color: rgba(255, 255, 255, 0.78);
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease;
+}
+
+.aluxil-sound-toggle:hover,
+.aluxil-sound-toggle:focus-visible {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  outline: none;
+}
+
+.aluxil-sound-toggle[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.aluxil-sound-toggle svg {
+  width: 1.08rem;
+  height: 1.08rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.aluxil-sound-toggle svg path:first-child {
+  fill: currentColor;
+  stroke: none;
+}
+
 .aluxil-language-switch {
   direction: ltr;
   display: inline-flex;
@@ -598,7 +647,9 @@ html {
   border: 1px solid rgba(245, 248, 255, 0.08);
   border-top: 0;
   border-radius: 0 0 0.55rem 0.55rem;
-  background: rgba(24, 31, 49, 0.96);
+  background: rgba(24, 31, 49, 0.76);
+  -webkit-backdrop-filter: blur(18px) saturate(1.14);
+  backdrop-filter: blur(18px) saturate(1.14);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 1.2rem 2.8rem rgba(0, 0, 0, 0.36);
@@ -610,7 +661,7 @@ html {
 
 .product-feature-section__size-picker--open .product-feature-section__size-menu {
   pointer-events: auto;
-  animation: product-dropdown-fall 760ms both;
+  animation: product-dropdown-fall 940ms both;
 }
 
 .product-feature-section__size-menu button {
@@ -661,29 +712,38 @@ html {
   0% {
     opacity: 0;
     filter: blur(1px);
-    transform: translateY(-1.7rem) scaleY(0.45);
+    transform: translateY(-1.75rem) scaleY(0.42);
   }
 
-  30% {
+  18% {
+    opacity: 0.72;
+    transform: translateY(-0.8rem) scaleY(0.68);
+  }
+
+  34% {
     opacity: 1;
     filter: blur(0);
-    transform: translateY(0.25rem) scaleY(1.08);
+    transform: translateY(0.42rem) scaleY(1.14);
   }
 
-  52% {
-    transform: translateY(0) scaleY(0.96);
+  45% {
+    transform: translateY(-0.28rem) scaleY(0.9);
   }
 
-  68% {
-    transform: translateY(0.18rem) scaleY(1.04);
+  58% {
+    transform: translateY(0.22rem) scaleY(1.07);
   }
 
-  80% {
-    transform: translateY(0) scaleY(0.985);
+  70% {
+    transform: translateY(-0.12rem) scaleY(0.965);
   }
 
-  90% {
-    transform: translateY(0.07rem) scaleY(1.012);
+  82% {
+    transform: translateY(0.07rem) scaleY(1.025);
+  }
+
+  92% {
+    transform: translateY(-0.03rem) scaleY(0.992);
   }
 
   100% {

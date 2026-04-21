@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/core/domain/home";
 
 const heroTitle = {
@@ -11,13 +11,303 @@ const heroTitle = {
 
 type WeatherHeroProps = {
   locale: Locale;
+  soundMuted: boolean;
 };
 
 function clamp(value: number) {
   return Math.min(Math.max(value, 0), 1);
 }
 
-export function WeatherHero({ locale }: WeatherHeroProps) {
+type HeroAudioGraph = {
+  birdGain: GainNode;
+  chirpTimer: number | null;
+  context: AudioContext;
+  master: GainNode;
+  rainFilter: BiquadFilterNode;
+  rainGain: GainNode;
+  rainSource: AudioBufferSourceNode;
+  snowGain: GainNode;
+  snowSource: AudioBufferSourceNode;
+};
+
+type HeroAudioState = {
+  muted: boolean;
+  progress: number;
+  rainPower: number;
+  snowOpacity: number;
+};
+
+function createNoiseBuffer(context: AudioContext, seconds: number) {
+  const buffer = context.createBuffer(1, context.sampleRate * seconds, context.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let index = 0; index < data.length; index += 1) {
+    data[index] = Math.random() * 2 - 1;
+  }
+
+  return buffer;
+}
+
+function createLoopingNoiseSource(context: AudioContext, seconds: number) {
+  const source = context.createBufferSource();
+
+  source.buffer = createNoiseBuffer(context, seconds);
+  source.loop = true;
+
+  return source;
+}
+
+function createHeroAudioGraph(context: AudioContext): HeroAudioGraph {
+  const master = context.createGain();
+  const birdGain = context.createGain();
+  const rainGain = context.createGain();
+  const snowGain = context.createGain();
+  const rainFilter = context.createBiquadFilter();
+  const snowFilter = context.createBiquadFilter();
+  const rainSource = createLoopingNoiseSource(context, 2);
+  const snowSource = createLoopingNoiseSource(context, 2);
+
+  master.gain.value = 0;
+  birdGain.gain.value = 0.65;
+  rainGain.gain.value = 0;
+  snowGain.gain.value = 0;
+  rainFilter.type = "bandpass";
+  rainFilter.frequency.value = 1250;
+  rainFilter.Q.value = 0.74;
+  snowFilter.type = "lowpass";
+  snowFilter.frequency.value = 520;
+  snowFilter.Q.value = 0.38;
+
+  rainSource.connect(rainFilter);
+  rainFilter.connect(rainGain);
+  rainGain.connect(master);
+  snowSource.connect(snowFilter);
+  snowFilter.connect(snowGain);
+  snowGain.connect(master);
+  birdGain.connect(master);
+  master.connect(context.destination);
+
+  rainSource.start();
+  snowSource.start();
+
+  return {
+    birdGain,
+    chirpTimer: null,
+    context,
+    master,
+    rainFilter,
+    rainGain,
+    rainSource,
+    snowGain,
+    snowSource,
+  };
+}
+
+function setSmoothValue(param: AudioParam, value: number, context: AudioContext, time = 0.28) {
+  const now = context.currentTime;
+
+  param.cancelScheduledValues(now);
+  param.setTargetAtTime(value, now, time);
+}
+
+function updateHeroAudio(graph: HeroAudioGraph, state: HeroAudioState) {
+  const { context } = graph;
+  const audible = state.muted ? 0 : 1;
+  const birdVolume =
+    state.progress < 0.32 && state.rainPower < 0.08 && state.snowOpacity < 0.08 ? 0.72 : 0.18;
+  const rainVolume = state.rainPower > 0.02 ? 0.012 + state.rainPower * 0.18 : 0;
+  const snowVolume = state.snowOpacity > 0.03 ? state.snowOpacity * 0.036 : 0;
+
+  setSmoothValue(graph.master.gain, audible * 0.58, context, 0.22);
+  setSmoothValue(graph.birdGain.gain, birdVolume, context, 0.8);
+  setSmoothValue(graph.rainGain.gain, audible * rainVolume, context, 0.24);
+  setSmoothValue(graph.snowGain.gain, audible * snowVolume, context, 0.5);
+  setSmoothValue(graph.rainFilter.frequency, 900 + state.rainPower * 2500, context, 0.18);
+  setSmoothValue(graph.rainFilter.Q, 0.64 + state.rainPower * 0.62, context, 0.18);
+}
+
+function playBirdChirp(graph: HeroAudioGraph) {
+  const { context } = graph;
+  const chirpCount = 2 + Math.floor(Math.random() * 2);
+
+  for (let index = 0; index < chirpCount; index += 1) {
+    const start = context.currentTime + index * (0.1 + Math.random() * 0.05);
+    const end = start + 0.12 + Math.random() * 0.05;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const baseFrequency = 1450 + Math.random() * 540;
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(baseFrequency, start);
+    oscillator.frequency.exponentialRampToValueAtTime(baseFrequency * (1.28 + Math.random() * 0.26), end);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.024 + Math.random() * 0.012, start + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+    oscillator.connect(gain);
+    gain.connect(graph.birdGain);
+    oscillator.start(start);
+    oscillator.stop(end + 0.02);
+  }
+}
+
+function playThunder(graph: HeroAudioGraph) {
+  const { context } = graph;
+  const now = context.currentTime;
+  const noise = context.createBufferSource();
+  const filter = context.createBiquadFilter();
+  const gain = context.createGain();
+  const rumble = context.createOscillator();
+  const rumbleGain = context.createGain();
+  const duration = 2.5 + Math.random() * 0.9;
+
+  noise.buffer = createNoiseBuffer(context, duration);
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(260 + Math.random() * 120, now);
+  filter.frequency.exponentialRampToValueAtTime(56 + Math.random() * 24, now + duration);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.34 + Math.random() * 0.16, now + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  rumble.type = "sine";
+  rumble.frequency.setValueAtTime(42 + Math.random() * 18, now);
+  rumble.frequency.exponentialRampToValueAtTime(28 + Math.random() * 12, now + duration);
+  rumbleGain.gain.setValueAtTime(0.0001, now);
+  rumbleGain.gain.exponentialRampToValueAtTime(0.16 + Math.random() * 0.08, now + 0.08);
+  rumbleGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(graph.master);
+  rumble.connect(rumbleGain);
+  rumbleGain.connect(graph.master);
+  noise.start(now);
+  noise.stop(now + duration);
+  rumble.start(now);
+  rumble.stop(now + duration);
+}
+
+function startBirdChirpLoop(
+  graph: HeroAudioGraph,
+  getLatestState: () => HeroAudioState,
+) {
+  if (graph.chirpTimer !== null) {
+    return;
+  }
+
+  graph.chirpTimer = window.setInterval(() => {
+    const latestState = getLatestState();
+
+    if (
+      !latestState.muted &&
+      latestState.progress < 0.32 &&
+      latestState.rainPower < 0.08 &&
+      latestState.snowOpacity < 0.08 &&
+      Math.random() > 0.34
+    ) {
+      playBirdChirp(graph);
+    }
+  }, 2100);
+}
+
+function useHeroWeatherAudio(state: HeroAudioState) {
+  const audioRef = useRef<HeroAudioGraph | null>(null);
+  const latestStateRef = useRef(state);
+
+  const ensureAudio = useCallback(() => {
+    if (audioRef.current) {
+      void audioRef.current.context.resume();
+      return audioRef.current;
+    }
+
+    const AudioContextConstructor =
+      window.AudioContext ??
+      (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+
+    if (!AudioContextConstructor) {
+      return null;
+    }
+
+    const context = new AudioContextConstructor();
+    const graph = createHeroAudioGraph(context);
+
+    audioRef.current = graph;
+    updateHeroAudio(graph, latestStateRef.current);
+    startBirdChirpLoop(graph, () => latestStateRef.current);
+    void context.resume();
+
+    return graph;
+  }, []);
+
+  useEffect(() => {
+    const nextState = {
+      muted: state.muted,
+      progress: state.progress,
+      rainPower: state.rainPower,
+      snowOpacity: state.snowOpacity,
+    };
+    const graph = audioRef.current;
+
+    latestStateRef.current = nextState;
+
+    if (!graph) {
+      return;
+    }
+
+    updateHeroAudio(graph, nextState);
+  }, [state.muted, state.progress, state.rainPower, state.snowOpacity]);
+
+  useEffect(() => {
+    const activateAudio = () => {
+      ensureAudio();
+    };
+
+    window.addEventListener("pointerdown", activateAudio, {
+      capture: true,
+      once: true,
+    });
+    window.addEventListener("keydown", activateAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", activateAudio, {
+        capture: true,
+      });
+      window.removeEventListener("keydown", activateAudio);
+
+      const graph = audioRef.current;
+
+      if (!graph) {
+        return;
+      }
+
+      if (graph.chirpTimer !== null) {
+        window.clearInterval(graph.chirpTimer);
+      }
+
+      try {
+        graph.rainSource.stop();
+        graph.snowSource.stop();
+      } catch {
+        // Audio nodes may already be stopped if the browser tears down the context.
+      }
+
+      void graph.context.close();
+      audioRef.current = null;
+    };
+  }, [ensureAudio]);
+
+  return useCallback(() => {
+    const graph = ensureAudio();
+
+    if (!graph || latestStateRef.current.muted) {
+      return;
+    }
+
+    playThunder(graph);
+  }, [ensureAudio]);
+}
+
+export function WeatherHero({ locale, soundMuted }: WeatherHeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
   const [flash, setFlash] = useState(false);
@@ -148,6 +438,12 @@ export function WeatherHero({ locale }: WeatherHeroProps) {
   const lensFlareRotation = `${progress * -58}deg`;
   const lensFlareX = `${36 - lensFlareTravel * 76}px`;
   const lensFlareY = `${54 - lensFlareTravel * 86}px`;
+  const triggerThunder = useHeroWeatherAudio({
+    muted: soundMuted,
+    progress,
+    rainPower,
+    snowOpacity,
+  });
 
   const heroStyle = {
     "--night-opacity": nightOpacity,
@@ -171,6 +467,7 @@ export function WeatherHero({ locale }: WeatherHeroProps) {
       peak: 1,
     });
     setFlash(true);
+    triggerThunder();
     window.setTimeout(() => setFlash(false), 1320);
   };
 

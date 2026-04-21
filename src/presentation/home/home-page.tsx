@@ -161,14 +161,20 @@ const copy = {
 
 export function HomePage({ overview }: HomePageProps) {
   const [locale, setLocale] = useState<Locale>(overview.defaultLocale);
+  const [soundMuted, setSoundMuted] = useState(false);
   const content = overview.locales[locale];
   const t = useMemo(() => copy[locale], [locale]);
 
   return (
     <>
-      <SiteHeader locale={locale} onLocaleChange={setLocale} />
+      <SiteHeader
+        locale={locale}
+        onLocaleChange={setLocale}
+        onSoundMutedChange={setSoundMuted}
+        soundMuted={soundMuted}
+      />
       <main className="min-h-screen bg-[var(--background)] text-zinc-950">
-        <WeatherHero locale={locale} />
+        <WeatherHero locale={locale} soundMuted={soundMuted} />
 
         <div className="post-hero-shell">
           <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">

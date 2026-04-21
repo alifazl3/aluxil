@@ -25,9 +25,16 @@ const navItems = {
 type SiteHeaderProps = {
   locale: Locale;
   onLocaleChange: (locale: Locale) => void;
+  onSoundMutedChange: (muted: boolean) => void;
+  soundMuted: boolean;
 };
 
-export function SiteHeader({ locale, onLocaleChange }: SiteHeaderProps) {
+export function SiteHeader({
+  locale,
+  onLocaleChange,
+  onSoundMutedChange,
+  soundMuted,
+}: SiteHeaderProps) {
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -50,17 +57,41 @@ export function SiteHeader({ locale, onLocaleChange }: SiteHeaderProps) {
           </a>
         ))}
       </nav>
-      <div className="aluxil-language-switch" aria-label="Language selection">
-        {(["de", "en"] as const).map((item) => (
-          <button
-            key={item}
-            aria-pressed={locale === item}
-            type="button"
-            onClick={() => onLocaleChange(item)}
-          >
-            {item.toUpperCase()}
-          </button>
-        ))}
+      <div className="aluxil-site-nav__actions">
+        <button
+          type="button"
+          className="aluxil-sound-toggle"
+          aria-label={soundMuted ? "Turn sound on" : "Mute sound"}
+          aria-pressed={!soundMuted}
+          onClick={() => onSoundMutedChange(!soundMuted)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.6 9.3h3.1l4.6-4.1v13.6l-4.6-4.1H4.6z" />
+            {soundMuted ? (
+              <>
+                <path d="m17.2 8.4 3.4 3.4" />
+                <path d="m20.6 8.4-3.4 3.4" />
+              </>
+            ) : (
+              <>
+                <path d="M15.7 8.2a5 5 0 0 1 0 7.6" />
+                <path d="M18.2 5.8a8.4 8.4 0 0 1 0 12.4" />
+              </>
+            )}
+          </svg>
+        </button>
+        <div className="aluxil-language-switch" aria-label="Language selection">
+          {(["de", "en"] as const).map((item) => (
+            <button
+              key={item}
+              aria-pressed={locale === item}
+              type="button"
+              onClick={() => onLocaleChange(item)}
+            >
+              {item.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
     </header>
   );
