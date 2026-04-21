@@ -169,119 +169,121 @@ export function HomePage({ overview }: HomePageProps) {
       <main className="min-h-screen bg-[var(--background)] text-zinc-950">
         <WeatherHero locale={locale} />
 
-      <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {content.metrics.map((metric) => (
-            <Panel key={metric.label} className="p-5">
-              <p className="text-sm font-medium text-zinc-500">
-                {metric.label}
-              </p>
-              <p className="mt-3 text-3xl font-semibold tracking-normal text-zinc-950">
-                {metric.value}
-              </p>
-              <p
-                className={`mt-4 inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold ${toneClasses[metric.tone]}`}
-              >
-                {metric.delta}
-              </p>
-            </Panel>
-          ))}
-        </div>
-      </section>
+        <div className="post-hero-shell">
+          <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {content.metrics.map((metric) => (
+                <Panel key={metric.label} className="p-5">
+                  <p className="text-sm font-medium text-zinc-500">
+                    {metric.label}
+                  </p>
+                  <p className="mt-3 text-3xl font-semibold tracking-normal text-zinc-950">
+                    {metric.value}
+                  </p>
+                  <p
+                    className={`mt-4 inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold ${toneClasses[metric.tone]}`}
+                  >
+                    {metric.delta}
+                  </p>
+                </Panel>
+              ))}
+            </div>
+          </section>
 
-      <section
-        id="services"
-        className="mx-auto max-w-7xl px-5 pb-12 sm:px-6 lg:px-8"
-      >
-        <SectionHeading
-          eyebrow={t.services.eyebrow}
-          title={t.services.title}
-          description={t.services.description}
-        />
-        <div className="mt-8">
-          <BenefitGrid benefits={content.benefits} />
-        </div>
-      </section>
+          <section
+            id="services"
+            className="mx-auto max-w-7xl px-5 pb-12 sm:px-6 lg:px-8"
+          >
+            <SectionHeading
+              eyebrow={t.services.eyebrow}
+              title={t.services.title}
+              description={t.services.description}
+            />
+            <div className="mt-8">
+              <BenefitGrid benefits={content.benefits} />
+            </div>
+          </section>
 
-      <section
-        id="products"
-        className="border-y border-zinc-200 bg-zinc-50 py-12"
-      >
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-6 lg:px-8">
-          <SectionHeading
-            eyebrow={t.products.eyebrow}
-            title={t.products.title}
-            description={t.products.description}
+          <section
+            id="products"
+            className="border-y border-zinc-200 bg-zinc-50 py-12"
+          >
+            <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-6 lg:px-8">
+              <SectionHeading
+                eyebrow={t.products.eyebrow}
+                title={t.products.title}
+                description={t.products.description}
+              />
+              <ProductSystems
+                products={content.products}
+                title={t.products.cardTitle}
+                subtitle={t.products.cardSubtitle}
+              />
+            </div>
+          </section>
+
+          <section
+            id="projects"
+            className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-6 lg:grid-cols-[0.82fr_1fr] lg:px-8"
+          >
+            <SectionHeading
+              eyebrow={t.projects.eyebrow}
+              title={t.projects.title}
+              description={t.projects.description}
+            />
+            <ProjectPipeline
+              badge={t.projects.badge}
+              dueLabel={t.projects.dueLabel}
+              projects={content.projects}
+              subtitle={t.projects.cardSubtitle}
+              title={t.projects.cardTitle}
+            />
+          </section>
+
+          <AudienceSolutions
+            audiences={content.audiences}
+            description={t.solutions.description}
+            eyebrow={t.solutions.eyebrow}
+            imageEyebrow={t.solutions.imageEyebrow}
+            imageTitle={t.solutions.imageTitle}
+            title={t.solutions.title}
           />
-          <ProductSystems
-            products={content.products}
-            title={t.products.cardTitle}
-            subtitle={t.products.cardSubtitle}
+
+          <section
+            id="faq"
+            className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 lg:grid-cols-[0.72fr_1fr] lg:px-8"
+          >
+            <SectionHeading
+              eyebrow={t.faq.eyebrow}
+              title={t.faq.title}
+              description={t.faq.description}
+            />
+            <div className="grid gap-4">
+              {content.requests.map((request) => (
+                <Panel key={request.id} className="p-5 sm:p-6">
+                  <p className="text-sm font-semibold uppercase tracking-normal text-cyan-700">
+                    {request.eta}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-zinc-950">
+                    {request.client}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-600">
+                    {request.request}
+                  </p>
+                </Panel>
+              ))}
+            </div>
+          </section>
+
+          <Testimonials
+            description={t.testimonials.description}
+            eyebrow={t.testimonials.eyebrow}
+            testimonials={content.testimonials}
+            title={t.testimonials.title}
           />
+          <ContactSection contact={content.contact} copy={t.contact} />
+          <SiteFooter contact={content.contact} copy={t.footer} />
         </div>
-      </section>
-
-      <section
-        id="projects"
-        className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-6 lg:grid-cols-[0.82fr_1fr] lg:px-8"
-      >
-        <SectionHeading
-          eyebrow={t.projects.eyebrow}
-          title={t.projects.title}
-          description={t.projects.description}
-        />
-        <ProjectPipeline
-          badge={t.projects.badge}
-          dueLabel={t.projects.dueLabel}
-          projects={content.projects}
-          subtitle={t.projects.cardSubtitle}
-          title={t.projects.cardTitle}
-        />
-      </section>
-
-      <AudienceSolutions
-        audiences={content.audiences}
-        description={t.solutions.description}
-        eyebrow={t.solutions.eyebrow}
-        imageEyebrow={t.solutions.imageEyebrow}
-        imageTitle={t.solutions.imageTitle}
-        title={t.solutions.title}
-      />
-
-      <section
-        id="faq"
-        className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 lg:grid-cols-[0.72fr_1fr] lg:px-8"
-      >
-        <SectionHeading
-          eyebrow={t.faq.eyebrow}
-          title={t.faq.title}
-          description={t.faq.description}
-        />
-        <div className="grid gap-4">
-          {content.requests.map((request) => (
-            <Panel key={request.id} className="p-5 sm:p-6">
-              <p className="text-sm font-semibold uppercase tracking-normal text-cyan-700">
-                {request.eta}
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-zinc-950">
-                {request.client}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
-                {request.request}
-              </p>
-            </Panel>
-          ))}
-        </div>
-      </section>
-
-      <Testimonials
-        description={t.testimonials.description}
-        eyebrow={t.testimonials.eyebrow}
-        testimonials={content.testimonials}
-        title={t.testimonials.title}
-      />
-      <ContactSection contact={content.contact} copy={t.contact} />
-      <SiteFooter contact={content.contact} copy={t.footer} />
       </main>
     </>
   );
