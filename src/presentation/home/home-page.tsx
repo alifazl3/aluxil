@@ -9,6 +9,7 @@ import { AudienceSolutions } from "./audience-solutions";
 import { BenefitGrid } from "./benefit-grid";
 import { ContactSection } from "./contact-section";
 import { ProjectPipeline } from "./project-pipeline";
+import { ProductFeature } from "./product-feature";
 import { ProductSystems } from "./product-systems";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
@@ -203,6 +204,8 @@ export function HomePage({ overview }: HomePageProps) {
               <BenefitGrid benefits={content.benefits} />
             </div>
           </section>
+
+          <ProductFeature locale={locale} />
 
           <section
             id="products"
