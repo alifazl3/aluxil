@@ -14,6 +14,7 @@ const products = {
   afw135: {
     name: "AFW135 System",
     image: "/products/afw135.png",
+    imageFit: "wide",
     options: [
       { size: "400 x 394 cm / 2 posts", price: "EUR 4,290" },
       { size: "400 x 500 cm / 3 posts", price: "EUR 5,190" },
@@ -24,7 +25,8 @@ const products = {
   },
   aw110: {
     name: "AW110 System",
-    image: "/products/afw135.png",
+    image: "/products/aw110.jpg",
+    imageFit: "tall",
     options: [
       { size: "340 x 340 cm / 2 posts", price: "EUR 3,490" },
       { size: "340 x 500 cm / 3 posts", price: "EUR 4,290" },
@@ -36,6 +38,7 @@ const products = {
 } satisfies Record<
   ProductKey,
   {
+    imageFit?: "wide" | "tall";
     image: string;
     name: string;
     options: { price: string; size: string }[];
@@ -126,21 +129,21 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
             alt=""
             fill
             sizes="(max-width: 900px) 92vw, 56vw"
-            className="product-feature-section__image product-feature-section__image--depth product-feature-section__image--depth-back"
+            className={`product-feature-section__image product-feature-section__image--${product.imageFit} product-feature-section__image--depth product-feature-section__image--depth-back`}
           />
           <Image
             src={product.image}
             alt=""
             fill
             sizes="(max-width: 900px) 92vw, 56vw"
-            className="product-feature-section__image product-feature-section__image--depth product-feature-section__image--depth-mid"
+            className={`product-feature-section__image product-feature-section__image--${product.imageFit} product-feature-section__image--depth product-feature-section__image--depth-mid`}
           />
           <Image
             src={product.image}
             alt={`${product.name} aluminium roof system`}
             fill
             sizes="(max-width: 900px) 92vw, 56vw"
-            className="product-feature-section__image"
+            className={`product-feature-section__image product-feature-section__image--${product.imageFit}`}
             priority={false}
           />
         </div>
