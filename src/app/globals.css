@@ -328,6 +328,7 @@ html {
 
 .product-feature-section {
   position: relative;
+  z-index: 6;
   display: grid;
   grid-template-columns: minmax(17rem, 0.72fr) minmax(28rem, 1.35fr);
   grid-template-rows: auto auto;
@@ -338,6 +339,7 @@ html {
   padding: clamp(3.5rem, 7vw, 5.4rem) clamp(1.5rem, 7vw, 5.5rem);
   color: rgba(246, 250, 255, 0.94);
   perspective: 1200px;
+  overflow: visible;
 }
 
 .product-feature-section::before {
@@ -551,6 +553,8 @@ html {
 
 .product-feature-section__controls {
   grid-column: 2;
+  position: relative;
+  z-index: 30;
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -564,7 +568,7 @@ html {
   display: grid;
   gap: 0.38rem;
   width: min(17.4rem, 100%);
-  z-index: 5;
+  z-index: 40;
 }
 
 .product-feature-section__size-picker > span {
@@ -639,6 +643,7 @@ html {
 
 .product-feature-section__size-menu {
   position: absolute;
+  z-index: 50;
   top: calc(100% + 0.1rem);
   left: 0.6rem;
   right: 0.6rem;

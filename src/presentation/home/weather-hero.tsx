@@ -22,6 +22,9 @@ type HeroAudioGraph = {
   birdGain: GainNode;
   chirpTimer: number | null;
   context: AudioContext;
+  cricketGain: GainNode;
+  cricketTimer: number | null;
+  dripTimer: number | null;
   master: GainNode;
   rainFilter: BiquadFilterNode;
   rainGain: GainNode;
@@ -31,6 +34,7 @@ type HeroAudioGraph = {
 };
 
 type HeroAudioState = {
+  heroPresence: number;
   muted: boolean;
   progress: number;
   rainPower: number;
@@ -60,6 +64,7 @@ function createLoopingNoiseSource(context: AudioContext, seconds: number) {
 function createHeroAudioGraph(context: AudioContext): HeroAudioGraph {
   const master = context.createGain();
   const birdGain = context.createGain();
+  const cricketGain = context.createGain();
   const rainGain = context.createGain();
   const snowGain = context.createGain();
   const rainFilter = context.createBiquadFilter();
@@ -69,6 +74,7 @@ function createHeroAudioGraph(context: AudioContext): HeroAudioGraph {
 
   master.gain.value = 0;
   birdGain.gain.value = 0.65;
+  cricketGain.gain.value = 0;
   rainGain.gain.value = 0;
   snowGain.gain.value = 0;
   rainFilter.type = "bandpass";
@@ -85,6 +91,7 @@ function createHeroAudioGraph(context: AudioContext): HeroAudioGraph {
   snowFilter.connect(snowGain);
   snowGain.connect(master);
   birdGain.connect(master);
+  cricketGain.connect(master);
   master.connect(context.destination);
 
   rainSource.start();
@@ -94,6 +101,9 @@ function createHeroAudioGraph(context: AudioContext): HeroAudioGraph {
     birdGain,
     chirpTimer: null,
     context,
+    cricketGain,
+    cricketTimer: null,
+    dripTimer: null,
     master,
     rainFilter,
     rainGain,
@@ -112,18 +122,64 @@ function setSmoothValue(param: AudioParam, value: number, context: AudioContext,
 
 function updateHeroAudio(graph: HeroAudioGraph, state: HeroAudioState) {
   const { context } = graph;
-  const audible = state.muted ? 0 : 1;
-  const birdVolume =
-    state.progress < 0.32 && state.rainPower < 0.08 && state.snowOpacity < 0.08 ? 0.72 : 0.18;
-  const rainVolume = state.rainPower > 0.02 ? 0.012 + state.rainPower * 0.18 : 0;
+  const audible = state.muted ? 0 : state.heroPresence;
+  const sunAmbience = state.progress < 0.16 ? 1 : 0;
+  const rainBody = Math.max(0, (state.rainPower - 0.12) / 0.88);
+  const rainVolume = rainBody > 0 ? Math.pow(rainBody, 1.55) * 0.15 : 0;
   const snowVolume = state.snowOpacity > 0.03 ? state.snowOpacity * 0.036 : 0;
 
   setSmoothValue(graph.master.gain, audible * 0.58, context, 0.22);
-  setSmoothValue(graph.birdGain.gain, birdVolume, context, 0.8);
+  setSmoothValue(graph.birdGain.gain, sunAmbience * 0.72, context, 0.55);
+  setSmoothValue(graph.cricketGain.gain, sunAmbience * 0.18, context, 0.55);
   setSmoothValue(graph.rainGain.gain, audible * rainVolume, context, 0.24);
   setSmoothValue(graph.snowGain.gain, audible * snowVolume, context, 0.5);
   setSmoothValue(graph.rainFilter.frequency, 900 + state.rainPower * 2500, context, 0.18);
   setSmoothValue(graph.rainFilter.Q, 0.64 + state.rainPower * 0.62, context, 0.18);
+}
+
+function playCricketTick(graph: HeroAudioGraph) {
+  const { context } = graph;
+  const start = context.currentTime;
+  const tickCount = 2 + Math.floor(Math.random() * 3);
+
+  for (let index = 0; index < tickCount; index += 1) {
+    const tickStart = start + index * (0.036 + Math.random() * 0.018);
+    const tickEnd = tickStart + 0.028;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(5200 + Math.random() * 1200, tickStart);
+    gain.gain.setValueAtTime(0.0001, tickStart);
+    gain.gain.exponentialRampToValueAtTime(0.014 + Math.random() * 0.006, tickStart + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, tickEnd);
+    oscillator.connect(gain);
+    gain.connect(graph.cricketGain);
+    oscillator.start(tickStart);
+    oscillator.stop(tickEnd + 0.01);
+  }
+}
+
+function playRainDrop(graph: HeroAudioGraph, power: number) {
+  const { context } = graph;
+  const now = context.currentTime;
+  const noise = context.createBufferSource();
+  const filter = context.createBiquadFilter();
+  const gain = context.createGain();
+  const duration = 0.035 + Math.random() * 0.025;
+
+  noise.buffer = createNoiseBuffer(context, duration);
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(620 + Math.random() * 880, now);
+  filter.Q.value = 5.4 + Math.random() * 2.2;
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.01 + power * 0.045, now + 0.006);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(graph.master);
+  noise.start(now);
+  noise.stop(now + duration);
 }
 
 function playBirdChirp(graph: HeroAudioGraph) {
@@ -199,7 +255,8 @@ function startBirdChirpLoop(
 
     if (
       !latestState.muted &&
-      latestState.progress < 0.32 &&
+      latestState.heroPresence > 0.05 &&
+      latestState.progress < 0.16 &&
       latestState.rainPower < 0.08 &&
       latestState.snowOpacity < 0.08 &&
       Math.random() > 0.34
@@ -207,6 +264,53 @@ function startBirdChirpLoop(
       playBirdChirp(graph);
     }
   }, 2100);
+}
+
+function startCricketLoop(
+  graph: HeroAudioGraph,
+  getLatestState: () => HeroAudioState,
+) {
+  if (graph.cricketTimer !== null) {
+    return;
+  }
+
+  graph.cricketTimer = window.setInterval(() => {
+    const latestState = getLatestState();
+
+    if (
+      !latestState.muted &&
+      latestState.heroPresence > 0.05 &&
+      latestState.progress < 0.16 &&
+      latestState.rainPower < 0.08 &&
+      Math.random() > 0.22
+    ) {
+      playCricketTick(graph);
+    }
+  }, 760);
+}
+
+function startRainDripLoop(
+  graph: HeroAudioGraph,
+  getLatestState: () => HeroAudioState,
+) {
+  if (graph.dripTimer !== null) {
+    return;
+  }
+
+  graph.dripTimer = window.setInterval(() => {
+    const latestState = getLatestState();
+    const probability = 0.12 + latestState.rainPower * 0.72;
+
+    if (
+      !latestState.muted &&
+      latestState.heroPresence > 0.05 &&
+      latestState.rainPower > 0.018 &&
+      latestState.snowOpacity < 0.18 &&
+      Math.random() < probability
+    ) {
+      playRainDrop(graph, latestState.rainPower);
+    }
+  }, 120);
 }
 
 function useHeroWeatherAudio(state: HeroAudioState) {
@@ -234,6 +338,8 @@ function useHeroWeatherAudio(state: HeroAudioState) {
     audioRef.current = graph;
     updateHeroAudio(graph, latestStateRef.current);
     startBirdChirpLoop(graph, () => latestStateRef.current);
+    startCricketLoop(graph, () => latestStateRef.current);
+    startRainDripLoop(graph, () => latestStateRef.current);
     void context.resume();
 
     return graph;
@@ -241,6 +347,7 @@ function useHeroWeatherAudio(state: HeroAudioState) {
 
   useEffect(() => {
     const nextState = {
+      heroPresence: state.heroPresence,
       muted: state.muted,
       progress: state.progress,
       rainPower: state.rainPower,
@@ -255,7 +362,13 @@ function useHeroWeatherAudio(state: HeroAudioState) {
     }
 
     updateHeroAudio(graph, nextState);
-  }, [state.muted, state.progress, state.rainPower, state.snowOpacity]);
+  }, [
+    state.heroPresence,
+    state.muted,
+    state.progress,
+    state.rainPower,
+    state.snowOpacity,
+  ]);
 
   useEffect(() => {
     const activateAudio = () => {
@@ -284,6 +397,14 @@ function useHeroWeatherAudio(state: HeroAudioState) {
         window.clearInterval(graph.chirpTimer);
       }
 
+      if (graph.cricketTimer !== null) {
+        window.clearInterval(graph.cricketTimer);
+      }
+
+      if (graph.dripTimer !== null) {
+        window.clearInterval(graph.dripTimer);
+      }
+
       try {
         graph.rainSource.stop();
         graph.snowSource.stop();
@@ -310,6 +431,7 @@ function useHeroWeatherAudio(state: HeroAudioState) {
 export function WeatherHero({ locale, soundMuted }: WeatherHeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
+  const [heroPresence, setHeroPresence] = useState(1);
   const [flash, setFlash] = useState(false);
   const [lightning, setLightning] = useState({
     duration: 1040,
@@ -326,9 +448,17 @@ export function WeatherHero({ locale, soundMuted }: WeatherHeroProps) {
 
       const rect = section.getBoundingClientRect();
       const scrollable = rect.height - window.innerHeight;
+      const viewportHeight = window.innerHeight;
       const nextProgress = scrollable > 0 ? clamp(-rect.top / scrollable) : 0;
+      const nextPresence =
+        rect.bottom < viewportHeight
+          ? clamp(rect.bottom / viewportHeight)
+          : rect.top > 0
+            ? clamp((viewportHeight - rect.top) / viewportHeight)
+            : 1;
 
       setProgress(nextProgress);
+      setHeroPresence(nextPresence);
     };
 
     updateProgress();
@@ -439,6 +569,7 @@ export function WeatherHero({ locale, soundMuted }: WeatherHeroProps) {
   const lensFlareX = `${36 - lensFlareTravel * 76}px`;
   const lensFlareY = `${54 - lensFlareTravel * 86}px`;
   const triggerThunder = useHeroWeatherAudio({
+    heroPresence,
     muted: soundMuted,
     progress,
     rainPower,
