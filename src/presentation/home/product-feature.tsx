@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Locale } from "@/core/domain/home";
 
 type ProductFeatureProps = {
@@ -79,6 +79,7 @@ const productCopy = {
 >;
 
 export function ProductFeature({ locale }: ProductFeatureProps) {
+  const descriptionRef = useRef<HTMLDivElement>(null);
   const [selectedProduct, setSelectedProduct] = useState<ProductKey>("afw135");
   const [selectedSize, setSelectedSize] = useState(products.afw135.options[0].size);
   const [isProductOpen, setIsProductOpen] = useState(false);
@@ -95,77 +96,80 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
   const handleProductChange = (value: ProductKey) => {
     setSelectedProduct(value);
     setSelectedSize(products[value].options[0].size);
+    descriptionRef.current?.scrollTo({ top: 0 });
     setIsProductOpen(false);
     setIsSizeOpen(false);
   };
 
   return (
     <section className="product-feature-section" aria-label="Product showcase">
-      <div className="product-feature-section__copy">
-        <p className="product-feature-section__eyebrow">{copy.eyebrow}</p>
-        <div
-          className={`product-feature-section__product-picker ${
-            isProductOpen ? "product-feature-section__product-picker--open" : ""
-          }`}
+      <p className="product-feature-section__eyebrow">{copy.eyebrow}</p>
+      <div
+        className={`product-feature-section__product-picker ${
+          isProductOpen ? "product-feature-section__product-picker--open" : ""
+        }`}
+      >
+        <span>{copy.productLabel}</span>
+        <button
+          type="button"
+          className="product-feature-section__product-trigger"
+          aria-controls="product-model-menu"
+          aria-expanded={isProductOpen}
+          aria-haspopup="listbox"
+          onClick={() => {
+            setIsProductOpen((isOpen) => !isOpen);
+            setIsSizeOpen(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setIsProductOpen(false);
+            }
+          }}
         >
-          <span>{copy.productLabel}</span>
-          <button
-            type="button"
-            className="product-feature-section__product-trigger"
-            aria-controls="product-model-menu"
-            aria-expanded={isProductOpen}
-            aria-haspopup="listbox"
-            onClick={() => {
-              setIsProductOpen((isOpen) => !isOpen);
-              setIsSizeOpen(false);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setIsProductOpen(false);
-              }
-            }}
-          >
-            {product.name}
-          </button>
-          <div
-            id="product-model-menu"
-            className="product-feature-section__product-menu"
-            role="listbox"
-            aria-hidden={!isProductOpen}
-          >
-            {(Object.keys(products) as ProductKey[]).map((key) => (
-              <button
-                key={key}
-                type="button"
-                role="option"
-                aria-selected={key === selectedProduct}
-                tabIndex={isProductOpen ? 0 : -1}
-                onClick={() => handleProductChange(key)}
-              >
-                {products[key].name}
-              </button>
-            ))}
-          </div>
+          {product.name}
+        </button>
+        <div
+          id="product-model-menu"
+          className="product-feature-section__product-menu"
+          role="listbox"
+          aria-hidden={!isProductOpen}
+        >
+          {(Object.keys(products) as ProductKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              role="option"
+              aria-selected={key === selectedProduct}
+              tabIndex={isProductOpen ? 0 : -1}
+              onClick={() => handleProductChange(key)}
+            >
+              {products[key].name}
+            </button>
+          ))}
         </div>
-        <div className="product-feature-section__description-wrap">
-          <div className="product-feature-section__description" tabIndex={0}>
-            {copy.descriptions[selectedProduct].split("\n").map((line, index) =>
-              line ? (
-                <p
-                  key={`${line}-${index}`}
-                  className={
-                    index === 0
-                      ? "product-feature-section__description-title"
-                      : "product-feature-section__description-body"
-                  }
-                >
-                  {line}
-                </p>
-              ) : (
-                <br key={index} />
-              ),
-            )}
-          </div>
+      </div>
+      <div className="product-feature-section__description-wrap">
+        <div
+          ref={descriptionRef}
+          className="product-feature-section__description"
+          tabIndex={0}
+        >
+          {copy.descriptions[selectedProduct].split("\n").map((line, index) =>
+            line ? (
+              <p
+                key={`${line}-${index}`}
+                className={
+                  index === 0
+                    ? "product-feature-section__description-title"
+                    : "product-feature-section__description-body"
+                }
+              >
+                {line}
+              </p>
+            ) : (
+              <br key={index} />
+            ),
+          )}
         </div>
       </div>
 
