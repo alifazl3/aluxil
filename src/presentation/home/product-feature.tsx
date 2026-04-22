@@ -81,6 +81,7 @@ const productCopy = {
 export function ProductFeature({ locale }: ProductFeatureProps) {
   const [selectedProduct, setSelectedProduct] = useState<ProductKey>("afw135");
   const [selectedSize, setSelectedSize] = useState(products.afw135.options[0].size);
+  const [isProductOpen, setIsProductOpen] = useState(false);
   const [isSizeOpen, setIsSizeOpen] = useState(false);
   const copy = productCopy[locale];
   const product = products[selectedProduct];
@@ -94,6 +95,7 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
   const handleProductChange = (value: ProductKey) => {
     setSelectedProduct(value);
     setSelectedSize(products[value].options[0].size);
+    setIsProductOpen(false);
     setIsSizeOpen(false);
   };
 
@@ -101,22 +103,50 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
     <section className="product-feature-section" aria-label="Product showcase">
       <div className="product-feature-section__copy">
         <p className="product-feature-section__eyebrow">{copy.eyebrow}</p>
-        <label className="product-feature-section__product-picker" htmlFor="product-picker">
+        <div
+          className={`product-feature-section__product-picker ${
+            isProductOpen ? "product-feature-section__product-picker--open" : ""
+          }`}
+        >
           <span>{copy.productLabel}</span>
-          <select
-            id="product-picker"
-            value={selectedProduct}
-            onChange={(event) =>
-              handleProductChange(event.currentTarget.value as ProductKey)
-            }
+          <button
+            type="button"
+            className="product-feature-section__product-trigger"
+            aria-controls="product-model-menu"
+            aria-expanded={isProductOpen}
+            aria-haspopup="listbox"
+            onClick={() => {
+              setIsProductOpen((isOpen) => !isOpen);
+              setIsSizeOpen(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                setIsProductOpen(false);
+              }
+            }}
+          >
+            {product.name}
+          </button>
+          <div
+            id="product-model-menu"
+            className="product-feature-section__product-menu"
+            role="listbox"
+            aria-hidden={!isProductOpen}
           >
             {(Object.keys(products) as ProductKey[]).map((key) => (
-              <option key={key} value={key}>
+              <button
+                key={key}
+                type="button"
+                role="option"
+                aria-selected={key === selectedProduct}
+                tabIndex={isProductOpen ? 0 : -1}
+                onClick={() => handleProductChange(key)}
+              >
                 {products[key].name}
-              </option>
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
         <div className="product-feature-section__description-wrap">
           <div className="product-feature-section__description" tabIndex={0}>
             {copy.descriptions[selectedProduct].split("\n").map((line, index) =>
@@ -179,7 +209,10 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
             aria-controls="product-size-menu"
             aria-expanded={isSizeOpen}
             aria-haspopup="listbox"
-            onClick={() => setIsSizeOpen((isOpen) => !isOpen)}
+            onClick={() => {
+              setIsSizeOpen((isOpen) => !isOpen);
+              setIsProductOpen(false);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
                 setIsSizeOpen(false);
