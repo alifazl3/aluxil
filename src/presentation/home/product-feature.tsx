@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Locale } from "@/core/domain/home";
 
 type ProductFeatureProps = {
@@ -77,6 +77,70 @@ const productCopy = {
     productLabel: string;
   }
 >;
+
+type ProductPriceProps = {
+  price: string;
+};
+
+function ProductPrice({ price }: ProductPriceProps) {
+  const [priceState, setPriceState] = useState({
+    current: price,
+    previous: price,
+    revision: 0,
+  });
+  let activePriceState = priceState;
+
+  if (priceState.current !== price) {
+    activePriceState = {
+      current: price,
+      previous: priceState.current,
+      revision: priceState.revision + 1,
+    };
+    setPriceState(activePriceState);
+  }
+
+  return (
+    <strong className="product-feature-section__price" aria-label={price}>
+      {Array.from(activePriceState.current).map((character, index) => {
+        const previousCharacter = activePriceState.previous[index] ?? character;
+        const isDigit = /\d/.test(character);
+        const changed = isDigit && previousCharacter !== character;
+
+        if (!isDigit) {
+          return (
+            <span
+              key={`static-${index}-${character}`}
+              className="product-feature-section__price-static"
+              aria-hidden="true"
+            >
+              {character}
+            </span>
+          );
+        }
+
+        return (
+          <span
+            key={`digit-${activePriceState.revision}-${index}-${character}`}
+            className={`product-feature-section__price-flap ${
+              changed ? "product-feature-section__price-flap--changed" : ""
+            }`}
+            style={{
+              "--flap-delay": `${index * 58}ms`,
+            } as CSSProperties}
+            aria-hidden="true"
+          >
+            <span className="product-feature-section__price-flap-old">
+              {previousCharacter}
+            </span>
+            <span className="product-feature-section__price-flap-new">
+              {character}
+            </span>
+          </span>
+        );
+      })}
+    </strong>
+  );
+}
 
 export function ProductFeature({ locale }: ProductFeatureProps) {
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -248,7 +312,7 @@ export function ProductFeature({ locale }: ProductFeatureProps) {
             ))}
           </div>
         </div>
-        <strong>{selectedOption.price}</strong>
+        <ProductPrice price={selectedOption.price} />
       </div>
     </section>
   );
