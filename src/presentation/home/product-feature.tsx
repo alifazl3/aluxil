@@ -92,17 +92,22 @@ function playPriceClick(context: AudioContext) {
   const now = context.currentTime;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
+  const filter = context.createBiquadFilter();
 
-  oscillator.type = "triangle";
-  oscillator.frequency.setValueAtTime(1240, now);
-  oscillator.frequency.exponentialRampToValueAtTime(330, now + 0.055);
+  oscillator.type = "square";
+  oscillator.frequency.setValueAtTime(1680, now);
+  oscillator.frequency.exponentialRampToValueAtTime(420, now + 0.048);
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(1450, now);
+  filter.Q.value = 1.2;
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.018, now + 0.008);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.062);
-  oscillator.connect(gain);
+  gain.gain.exponentialRampToValueAtTime(0.012, now + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+  oscillator.connect(filter);
+  filter.connect(gain);
   gain.connect(context.destination);
   oscillator.start(now);
-  oscillator.stop(now + 0.07);
+  oscillator.stop(now + 0.055);
 }
 
 type PriceDigitWheelProps = {
@@ -266,18 +271,32 @@ function ProductPrice({ price }: ProductPriceProps) {
           : [],
     );
 
-    const timers = changedDigitIndexes.map((index) =>
-      window.setTimeout(() => {
-        const context = audioContextRef.current;
+    const timers = changedDigitIndexes.flatMap((index) => {
+      const tickCount = 8;
+      const digitDuration = 1380 + index * 40;
+      const baseDelay = index * 54;
 
-        if (!context || context.state === "closed") {
-          return;
-        }
+      return Array.from({ length: tickCount }, (_, tickIndex) => {
+        const progress = tickIndex / (tickCount - 1);
+        const shapedProgress =
+          progress < 0.58
+            ? 0.68 * Math.pow(progress / 0.58, 1.85)
+            : 0.68 +
+              0.32 *
+                (1 - Math.pow(1 - (progress - 0.58) / 0.42, 1.45));
 
-        void context.resume();
-        playPriceClick(context);
-      }, index * 54),
-    );
+        return window.setTimeout(() => {
+          const context = audioContextRef.current;
+
+          if (!context || context.state === "closed") {
+            return;
+          }
+
+          void context.resume();
+          playPriceClick(context);
+        }, baseDelay + shapedProgress * digitDuration);
+      });
+    });
 
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
