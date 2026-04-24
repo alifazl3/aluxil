@@ -88,34 +88,34 @@ type ProductPriceProps = {
   price: string;
 };
 
-function createMechanicalClickBuffer(context: AudioContext) {
-  const duration = 0.082;
+function createSpinnerClickBuffer(context: AudioContext) {
+  const duration = 0.094;
   const frameCount = Math.floor(context.sampleRate * duration);
   const buffer = context.createBuffer(1, frameCount, context.sampleRate);
   const data = buffer.getChannelData(0);
-  const pulsePositions = [0.02, 0.19, 0.4, 0.68];
+  const spokePositions = [0.04, 0.18, 0.34, 0.5, 0.67, 0.82];
 
   for (let index = 0; index < frameCount; index += 1) {
     const progress = index / frameCount;
-    const pulseEnvelope = pulsePositions.reduce((total, pulseStart, pulseIndex) => {
-      const local = Math.max(0, progress - pulseStart);
-      const pulseDecay = Math.exp(-local * (36 + pulseIndex * 10));
-      const pulseGate = local < 0.12 ? 1 : 0;
+    const spinEnvelope = Math.exp(-progress * 4.1);
+    const spokeEnvelope = spokePositions.reduce((total, spokeStart, spokeIndex) => {
+      const local = Math.max(0, progress - spokeStart);
+      const hitDecay = Math.exp(-local * (52 + spokeIndex * 4));
+      const hitGate = local < 0.065 ? 1 : 0;
 
-      return total + pulseDecay * pulseGate;
+      return total + hitDecay * hitGate;
     }, 0);
-    const bodyDecay = Math.exp(-progress * 8.5);
-    const grain = (Math.random() * 2 - 1) * pulseEnvelope;
-    const metallic =
-      Math.sin((index / context.sampleRate) * Math.PI * 2 * 2140) *
-      0.08 *
-      pulseEnvelope;
-    const tail =
-      Math.sin((index / context.sampleRate) * Math.PI * 2 * 310) *
+    const air = (Math.random() * 2 - 1) * 0.18 * spinEnvelope;
+    const whirr =
+      Math.sin((index / context.sampleRate) * Math.PI * 2 * 1260) *
+      0.1 *
+      spinEnvelope;
+    const spoke =
+      Math.sin((index / context.sampleRate) * Math.PI * 2 * 2340) *
       0.06 *
-      bodyDecay;
+      spokeEnvelope;
 
-    data[index] = grain * 0.72 + metallic + tail;
+    data[index] = air + whirr + spoke;
   }
 
   return buffer;
@@ -126,38 +126,50 @@ function playPriceClick(context: AudioContext) {
   const noise = context.createBufferSource();
   const noiseFilter = context.createBiquadFilter();
   const noiseGain = context.createGain();
-  const bodyOscillator = context.createOscillator();
-  const bodyGain = context.createGain();
-  const transientFilter = context.createBiquadFilter();
+  const spinOscillator = context.createOscillator();
+  const spinGain = context.createGain();
+  const tremolo = context.createOscillator();
+  const tremoloGain = context.createGain();
+  const softFilter = context.createBiquadFilter();
 
-  noise.buffer = createMechanicalClickBuffer(context);
+  noise.buffer = createSpinnerClickBuffer(context);
   noiseFilter.type = "bandpass";
-  noiseFilter.frequency.setValueAtTime(1180, now);
-  noiseFilter.Q.value = 1.35;
-  transientFilter.type = "highpass";
-  transientFilter.frequency.setValueAtTime(540, now);
+  noiseFilter.frequency.setValueAtTime(1680, now);
+  noiseFilter.Q.value = 0.92;
+  softFilter.type = "highpass";
+  softFilter.frequency.setValueAtTime(760, now);
   noiseGain.gain.setValueAtTime(0.0001, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.022, now + 0.004);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.072);
+  noiseGain.gain.exponentialRampToValueAtTime(0.014, now + 0.006);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
 
-  bodyOscillator.type = "triangle";
-  bodyOscillator.frequency.setValueAtTime(124, now);
-  bodyOscillator.frequency.exponentialRampToValueAtTime(78, now + 0.072);
-  bodyGain.gain.setValueAtTime(0.0001, now);
-  bodyGain.gain.exponentialRampToValueAtTime(0.008, now + 0.01);
-  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.078);
+  spinOscillator.type = "triangle";
+  spinOscillator.frequency.setValueAtTime(520, now);
+  spinOscillator.frequency.exponentialRampToValueAtTime(210, now + 0.092);
+  spinGain.gain.setValueAtTime(0.0001, now);
+  spinGain.gain.exponentialRampToValueAtTime(0.008, now + 0.01);
+  spinGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.094);
+
+  tremolo.type = "square";
+  tremolo.frequency.setValueAtTime(42, now);
+  tremolo.frequency.exponentialRampToValueAtTime(16, now + 0.094);
+  tremoloGain.gain.setValueAtTime(0.0026, now);
+  tremoloGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.094);
 
   noise.connect(noiseFilter);
-  noiseFilter.connect(transientFilter);
-  transientFilter.connect(noiseGain);
+  noiseFilter.connect(softFilter);
+  softFilter.connect(noiseGain);
   noiseGain.connect(context.destination);
-  bodyOscillator.connect(bodyGain);
-  bodyGain.connect(context.destination);
+  spinOscillator.connect(spinGain);
+  spinGain.connect(context.destination);
+  tremolo.connect(tremoloGain);
+  tremoloGain.connect(context.destination);
 
   noise.start(now);
-  noise.stop(now + 0.082);
-  bodyOscillator.start(now);
-  bodyOscillator.stop(now + 0.082);
+  noise.stop(now + 0.094);
+  spinOscillator.start(now);
+  spinOscillator.stop(now + 0.094);
+  tremolo.start(now);
+  tremolo.stop(now + 0.094);
 }
 
 type PriceDigitWheelProps = {
