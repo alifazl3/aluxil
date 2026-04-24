@@ -89,20 +89,33 @@ type ProductPriceProps = {
 };
 
 function createMechanicalClickBuffer(context: AudioContext) {
-  const duration = 0.065;
+  const duration = 0.082;
   const frameCount = Math.floor(context.sampleRate * duration);
   const buffer = context.createBuffer(1, frameCount, context.sampleRate);
   const data = buffer.getChannelData(0);
+  const pulsePositions = [0.02, 0.19, 0.4, 0.68];
 
   for (let index = 0; index < frameCount; index += 1) {
-    const decay = Math.exp((-index / frameCount) * 10.5);
-    const grain = (Math.random() * 2 - 1) * decay;
-    const rattle =
-      Math.sin((index / context.sampleRate) * Math.PI * 2 * 1720) *
-      0.12 *
-      decay;
+    const progress = index / frameCount;
+    const pulseEnvelope = pulsePositions.reduce((total, pulseStart, pulseIndex) => {
+      const local = Math.max(0, progress - pulseStart);
+      const pulseDecay = Math.exp(-local * (36 + pulseIndex * 10));
+      const pulseGate = local < 0.12 ? 1 : 0;
 
-    data[index] = grain * 0.92 + rattle;
+      return total + pulseDecay * pulseGate;
+    }, 0);
+    const bodyDecay = Math.exp(-progress * 8.5);
+    const grain = (Math.random() * 2 - 1) * pulseEnvelope;
+    const metallic =
+      Math.sin((index / context.sampleRate) * Math.PI * 2 * 2140) *
+      0.08 *
+      pulseEnvelope;
+    const tail =
+      Math.sin((index / context.sampleRate) * Math.PI * 2 * 310) *
+      0.06 *
+      bodyDecay;
+
+    data[index] = grain * 0.72 + metallic + tail;
   }
 
   return buffer;
@@ -115,32 +128,36 @@ function playPriceClick(context: AudioContext) {
   const noiseGain = context.createGain();
   const bodyOscillator = context.createOscillator();
   const bodyGain = context.createGain();
+  const transientFilter = context.createBiquadFilter();
 
   noise.buffer = createMechanicalClickBuffer(context);
   noiseFilter.type = "bandpass";
-  noiseFilter.frequency.setValueAtTime(860, now);
-  noiseFilter.Q.value = 0.8;
+  noiseFilter.frequency.setValueAtTime(1180, now);
+  noiseFilter.Q.value = 1.35;
+  transientFilter.type = "highpass";
+  transientFilter.frequency.setValueAtTime(540, now);
   noiseGain.gain.setValueAtTime(0.0001, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.018, now + 0.004);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.048);
+  noiseGain.gain.exponentialRampToValueAtTime(0.022, now + 0.004);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.072);
 
   bodyOscillator.type = "triangle";
-  bodyOscillator.frequency.setValueAtTime(148, now);
-  bodyOscillator.frequency.exponentialRampToValueAtTime(92, now + 0.055);
+  bodyOscillator.frequency.setValueAtTime(124, now);
+  bodyOscillator.frequency.exponentialRampToValueAtTime(78, now + 0.072);
   bodyGain.gain.setValueAtTime(0.0001, now);
-  bodyGain.gain.exponentialRampToValueAtTime(0.011, now + 0.008);
-  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+  bodyGain.gain.exponentialRampToValueAtTime(0.008, now + 0.01);
+  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.078);
 
   noise.connect(noiseFilter);
-  noiseFilter.connect(noiseGain);
+  noiseFilter.connect(transientFilter);
+  transientFilter.connect(noiseGain);
   noiseGain.connect(context.destination);
   bodyOscillator.connect(bodyGain);
   bodyGain.connect(context.destination);
 
   noise.start(now);
-  noise.stop(now + 0.06);
+  noise.stop(now + 0.082);
   bodyOscillator.start(now);
-  bodyOscillator.stop(now + 0.065);
+  bodyOscillator.stop(now + 0.082);
 }
 
 type PriceDigitWheelProps = {
