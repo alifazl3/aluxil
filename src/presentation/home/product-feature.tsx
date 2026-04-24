@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Locale } from "@/core/domain/home";
 
 type ProductFeatureProps = {
@@ -82,6 +87,91 @@ type ProductPriceProps = {
   price: string;
 };
 
+type PriceDigitWheelProps = {
+  digit: string;
+  index: number;
+  previousDigit: string;
+  revision: number;
+};
+
+function PriceDigitWheel({
+  digit,
+  index,
+  previousDigit,
+  revision,
+}: PriceDigitWheelProps) {
+  const stackRef = useRef<HTMLSpanElement>(null);
+  const currentValue = Number(digit);
+  const previousValue = Number(previousDigit);
+  const finalDelta = (currentValue - previousValue + 10) % 10;
+  const totalSteps = revision === 0 ? 0 : 30 + finalDelta;
+  const sequence = useMemo(
+    () =>
+      Array.from({ length: totalSteps + 1 }, (_, step) =>
+        String((previousValue + step) % 10),
+      ),
+    [previousValue, totalSteps],
+  );
+  const reversedSequence = useMemo(() => [...sequence].reverse(), [sequence]);
+  const startOffset = totalSteps * -100;
+  const coastOffset = (totalSteps - 30) * -100;
+
+  useLayoutEffect(() => {
+    const stack = stackRef.current;
+
+    if (!stack) {
+      return;
+    }
+
+    if (revision === 0) {
+      stack.style.transform = "translateY(0%)";
+      return;
+    }
+
+    stack.style.transform = `translateY(${startOffset}%)`;
+    const animation = stack.animate(
+      [
+        {
+          offset: 0,
+          transform: `translateY(${startOffset}%)`,
+          easing: "cubic-bezier(0.42, 0, 0.96, 0.64)",
+        },
+        {
+          offset: 0.68,
+          transform: `translateY(${coastOffset}%)`,
+          easing: "cubic-bezier(0.06, 0.72, 0.18, 1)",
+        },
+        {
+          offset: 1,
+          transform: "translateY(0%)",
+        },
+      ],
+      {
+        delay: index * 54,
+        duration: 1580 + index * 44,
+        fill: "both",
+      },
+    );
+
+    return () => animation.cancel();
+  }, [coastOffset, index, revision, startOffset]);
+
+  return (
+    <span className="product-feature-section__price-wheel" aria-hidden="true">
+      <span ref={stackRef} className="product-feature-section__price-wheel-stack">
+        {reversedSequence.map((value, valueIndex) => (
+          <span
+            key={`wheel-${revision}-${index}-${valueIndex}-${value}`}
+            className="product-feature-section__price-wheel-digit"
+          >
+            {value}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 function ProductPrice({ price }: ProductPriceProps) {
   const [priceState, setPriceState] = useState({
     current: price,
@@ -104,7 +194,6 @@ function ProductPrice({ price }: ProductPriceProps) {
       {Array.from(activePriceState.current).map((character, index) => {
         const previousCharacter = activePriceState.previous[index] ?? character;
         const isDigit = /\d/.test(character);
-        const changed = isDigit && previousCharacter !== character;
 
         if (!isDigit) {
           return (
@@ -119,23 +208,13 @@ function ProductPrice({ price }: ProductPriceProps) {
         }
 
         return (
-          <span
+          <PriceDigitWheel
             key={`digit-${activePriceState.revision}-${index}-${character}`}
-            className={`product-feature-section__price-flap ${
-              changed ? "product-feature-section__price-flap--changed" : ""
-            }`}
-            style={{
-              "--flap-delay": `${index * 58}ms`,
-            } as CSSProperties}
-            aria-hidden="true"
-          >
-            <span className="product-feature-section__price-flap-old">
-              {previousCharacter}
-            </span>
-            <span className="product-feature-section__price-flap-new">
-              {character}
-            </span>
-          </span>
+            digit={character}
+            index={index}
+            previousDigit={previousCharacter}
+            revision={activePriceState.revision}
+          />
         );
       })}
     </strong>
