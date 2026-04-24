@@ -313,21 +313,30 @@ function ProductPrice({ price }: ProductPriceProps) {
       return;
     }
 
-    const changedDigitIndexes = Array.from(priceState.current).flatMap(
-      (character, index) =>
-        /\d/.test(character) &&
-        (priceState.previous[index] ?? character) !== character
-          ? [index]
-          : [],
+    const changedDigits = Array.from(priceState.current).flatMap(
+      (character, index) => {
+        const previousCharacter = priceState.previous[index] ?? character;
+
+        if (!/\d/.test(character) || previousCharacter === character) {
+          return [];
+        }
+
+        const currentValue = Number(character);
+        const previousValue = Number(previousCharacter);
+        const finalDelta = (currentValue - previousValue + 10) % 10;
+        const totalSteps = 20 + finalDelta;
+
+        return [{ index, totalSteps }];
+      },
     );
 
-    const timers = changedDigitIndexes.flatMap((index) => {
-      const tickCount = 8;
+    const timers = changedDigits.flatMap(({ index, totalSteps }) => {
+      const tickCount = totalSteps;
       const digitDuration = 1380 + index * 40;
       const baseDelay = index * 54;
 
       return Array.from({ length: tickCount }, (_, tickIndex) => {
-        const progress = tickIndex / (tickCount - 1);
+        const progress = tickCount === 1 ? 1 : tickIndex / (tickCount - 1);
         const shapedProgress =
           progress < 0.58
             ? 0.68 * Math.pow(progress / 0.58, 1.85)
