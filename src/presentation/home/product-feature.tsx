@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import {
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -87,6 +88,23 @@ type ProductPriceProps = {
   price: string;
 };
 
+function playPriceClick(context: AudioContext) {
+  const now = context.currentTime;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(1240, now);
+  oscillator.frequency.exponentialRampToValueAtTime(330, now + 0.055);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.018, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.062);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.07);
+}
+
 type PriceDigitWheelProps = {
   digit: string;
   index: number;
@@ -104,7 +122,7 @@ function PriceDigitWheel({
   const currentValue = Number(digit);
   const previousValue = Number(previousDigit);
   const finalDelta = (currentValue - previousValue + 10) % 10;
-  const totalSteps = revision === 0 ? 0 : 30 + finalDelta;
+  const totalSteps = revision === 0 ? 0 : 20 + finalDelta;
   const sequence = useMemo(
     () =>
       Array.from({ length: totalSteps + 1 }, (_, step) =>
@@ -114,7 +132,7 @@ function PriceDigitWheel({
   );
   const reversedSequence = useMemo(() => [...sequence].reverse(), [sequence]);
   const startOffset = totalSteps * -100;
-  const coastOffset = (totalSteps - 30) * -100;
+  const coastOffset = (totalSteps - 20) * -100;
 
   useLayoutEffect(() => {
     const stack = stackRef.current;
@@ -148,7 +166,7 @@ function PriceDigitWheel({
       ],
       {
         delay: index * 54,
-        duration: 1580 + index * 44,
+        duration: 1380 + index * 40,
         fill: "both",
       },
     );
@@ -173,6 +191,7 @@ function PriceDigitWheel({
 }
 
 function ProductPrice({ price }: ProductPriceProps) {
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [priceState, setPriceState] = useState({
     current: price,
     previous: price,
@@ -188,6 +207,82 @@ function ProductPrice({ price }: ProductPriceProps) {
     };
     setPriceState(activePriceState);
   }
+
+  useEffect(() => {
+    const enableAudio = () => {
+      if (audioContextRef.current) {
+        void audioContextRef.current.resume();
+        return;
+      }
+
+      const AudioContextConstructor =
+        window.AudioContext ??
+        (window as Window &
+          typeof globalThis & {
+            webkitAudioContext?: typeof AudioContext;
+          }).webkitAudioContext;
+
+      if (!AudioContextConstructor) {
+        return;
+      }
+
+      audioContextRef.current = new AudioContextConstructor();
+      void audioContextRef.current.resume();
+    };
+
+    window.addEventListener("pointerdown", enableAudio, {
+      capture: true,
+      once: true,
+    });
+    window.addEventListener("keydown", enableAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", enableAudio, {
+        capture: true,
+      });
+      window.removeEventListener("keydown", enableAudio);
+
+      const context = audioContextRef.current;
+
+      if (!context) {
+        return;
+      }
+
+      void context.close();
+      audioContextRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (priceState.revision === 0) {
+      return;
+    }
+
+    const changedDigitIndexes = Array.from(priceState.current).flatMap(
+      (character, index) =>
+        /\d/.test(character) &&
+        (priceState.previous[index] ?? character) !== character
+          ? [index]
+          : [],
+    );
+
+    const timers = changedDigitIndexes.map((index) =>
+      window.setTimeout(() => {
+        const context = audioContextRef.current;
+
+        if (!context || context.state === "closed") {
+          return;
+        }
+
+        void context.resume();
+        playPriceClick(context);
+      }, index * 54),
+    );
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [priceState]);
 
   return (
     <strong className="product-feature-section__price" aria-label={price}>
